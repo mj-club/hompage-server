@@ -1,0 +1,28 @@
+{
+  "name": "mju_club_homepage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm-run-all --parallel start:**",
+    "start:client": "cd client && npm start",
+    "start:server": "cd server && npm start",
+    "dev": "npm-run-all --parallel dev:**",
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm run dev"
+  },
+  "dependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "keywords": [],
+  "contributors": [
+    "dj-1087",
+    "JIW0N-PARK",
+    "EUNJI-PARK",
+    "HyunSBong",
+    "yjs000",
+    "Dr-newbie",
+    "Hwijun-Kim"
+  ],
+  "license": "MIT"
+}

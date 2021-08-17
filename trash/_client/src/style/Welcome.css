@@ -1,0 +1,21 @@
+/* 메뉴바 색상 #A99371
+
+메뉴바 글씨는 흰색/ 클릭하면 색 바뀌게하기 #FFEF96
+
+메뉴바 폰트IBM Plex Sans KR SemiBold
+
+클릭하면 IBM Plex Sans KR Bold로 더 두껍게 표시 */
+
+#welcome-text {
+  color : #A99371;
+}
+
+#inform-id-box{
+  background-color : #A99371;
+  border-radius: 20px;
+}
+
+
+#alert{
+  font-size: 0.85rem;
+}

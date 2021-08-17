@@ -1,0 +1,10 @@
+.right-title{
+  text-align: end;
+  padding-top: 15px;
+  border-bottom : 1px solid gray;
+  font-family: "twayair";
+}
+
+.mb-0.col-4{
+  border-bottom: 3.5px solid #A99371;
+}

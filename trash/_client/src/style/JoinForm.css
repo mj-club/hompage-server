@@ -1,0 +1,43 @@
+.body{
+  border :3px solid #F1C40F;
+}
+
+.top-icon{
+  text-align : center;
+}
+
+.content{
+  text-align : center;
+}
+
+.form-title{
+  font-size: 2rem;
+  margin-top: 16px;
+  margin-bottom : 16px;
+}
+
+.form-sub-title{
+  text-align: left;
+}
+
+.form-table{
+text-align: start;
+}
+
+label.form-labels.form-label{
+  margin: 0;
+}
+h5 {
+  margin-top: 45px;
+}
+
+
+#valid-btn{
+  font-size: 0.5rem;
+  float: right;
+}
+
+
+#isStudent{
+  text-align: right;
+}
