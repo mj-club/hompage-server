@@ -4,15 +4,15 @@ module.exports = class RentalInfo extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        room_name: {
+        room_name: { // 대여 공간 및 물품명
           type: Sequelize.STRING(45),
           allowNull: false
         },
-        rental_state: {
+        rental_state: { // 대여 가능 여부 (1:가능. 0:불가)
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        room_img: {
+        room_img: { // 사진
           type: Sequelize.STRING(45),
           allowNull: false
         },

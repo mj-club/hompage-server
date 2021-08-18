@@ -4,23 +4,23 @@ module.exports = class Schedule extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        title: {
+        title: { // 일정 제목
           type: Sequelize.STRING(100),
           allowNull: false
         },
-        description: {
+        description: { // 일정 내용
           type: Sequelize.TEXT,
           allowNull: false
         },
-        start: {
+        start: { // 일정 시작일 (시간포함)
           type: Sequelize.DATE,
           allowNull: false
         },
-        end: {
+        end: { // 일정 종료일 (시간포함)
           type: Sequelize.DATE,
           allowNull: false
         },
-        all_day_long: {
+        all_day_long: { // 하루종일 (true:하루종일, false:시간지정)
           type: Sequelize.BOOLEAN,
           allowNull: true
         },

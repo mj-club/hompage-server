@@ -4,7 +4,7 @@ module.exports = class Board extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        name: {
+        name: { // 게시판 이름 
           type: Sequelize.STRING(100),
           allowNull: false
         },
