@@ -29,7 +29,7 @@ module.exports = class Join extends Sequelize.Model {
   }
 
   static associate(db) {
-    // Join - ClubInfo (1:1)
+    // Join - ClubInfo (n:1)
     db.Join.belongsTo(db.ClubInfo, {
       foreignKey: "club_info_id",
       targetKey: "id",

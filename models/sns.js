@@ -29,7 +29,7 @@ module.exports = class Sns extends Sequelize.Model {
   }
 
   static associate(db) {
-    // Sns - ClubInfo (1:1)
+    // Sns - ClubInfo (n:1)
     db.Sns.belongsTo(db.ClubInfo, {
       foreignKey: "club_info_id",
       targetKey: "id",
