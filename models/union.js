@@ -4,11 +4,11 @@ module.exports = class Union extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        name: {
+        name: { // 총동아리연합회(default)
           type: Sequelize.STRING(45),
           allowNull: false
         },
-        introduction: {
+        introduction: { // 총동아리연합회 소개(default)
           type: Sequelize.TEXT,
           allowNull: true
         },

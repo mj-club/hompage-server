@@ -4,19 +4,19 @@ module.exports = class File extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        file_type: {
+        file_type: { // 확장자명
           type: Sequelize.STRING(45),
           allowNull: true
         },
-        url: {
+        url: { // 파일 경로
           type: Sequelize.STRING(100),
           allowNull: true
         },
-        original_url: {
+        original_url: { // 파일 전체 경로
           type: Sequelize.STRING(100),
           allowNull: true
         },
-        description: {
+        description: { // 파일 설명
           type: Sequelize.TEXT,
           allowNull: true
         },

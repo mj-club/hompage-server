@@ -4,7 +4,7 @@ module.exports = class Comment extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        content: {
+        content: { // 댓글 내용
           type: Sequelize.TEXT,
           allowNull: false
         },

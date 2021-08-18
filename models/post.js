@@ -4,31 +4,31 @@ module.exports = class Post extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        title: {
+        title: { // 제목
           type: Sequelize.STRING(100),
           allowNull: false
         },
-        thumbnail: {
+        thumbnail: { // 게시물 목록에서의 미리보기 (내용일부)
           type: Sequelize.STRING(250),
           allowNull: true
         },
-        content: {
+        content: { // 내용
           type: Sequelize.TEXT,
           allowNull: true
         },
-        set_top: {
+        set_top: { // 상단 고정 여부 (true: 상단고정, false: 고정하지않음)
           type: Sequelize.BOOLEAN,
           allowNull: true
         },
-        visit_count: {
+        visit_count: { // 조회수
           type: Sequelize.INTEGER,
           allowNull: true
         },
-        comment_count: {
+        comment_count: { // 댓글수
           type: Sequelize.INTEGER,
           allowNull: true
         },
-        thumb_count: {
+        thumb_count: { // 좋아요수
           type: Sequelize.INTEGER,
           allowNull: true
         },
