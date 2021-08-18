@@ -1,80 +1,58 @@
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('union_info', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    name: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    slogan: {
-      type: DataTypes.STRING(100),
-      allowNull: true
-    },
-    introduction: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    representative: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    deputy_representative: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    organization_chart: {
-      type: DataTypes.STRING(200),
-      allowNull: true
-    },
-    logo: {
-      type: DataTypes.STRING(200),
-      allowNull: true
-    },
-    th: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    union_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'union',
-        key: 'id'
+
+module.exports = class UnionInfo extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
+      {
+        name: {
+          type: Sequelize.STRING(45),
+          allowNull: false
+        },
+        slogan: {
+          type: Sequelize.STRING(100),
+          allowNull: true
+        },
+        introduction: {
+          type: Sequelize.TEXT,
+          allowNull: true
+        },
+        representative: {
+          type: Sequelize.STRING(45),
+          allowNull: true
+        },
+        deputy_representative: {
+          type: Sequelize.STRING(45),
+          allowNull: true
+        },
+        organization_chart: {
+          type: Sequelize.STRING(200),
+          allowNull: true
+        },
+        logo: {
+          type: Sequelize.STRING(200),
+          allowNull: true
+        },
+        th: {
+          type: Sequelize.INTEGER,
+          allowNull: true
+        },
+      }, {
+        sequelize,
+        modelName: "UnionInfo",
+        tableName: 'union_info',
+        timestamps: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicon"
       }
-    }
-  }, {
-    sequelize,
-    tableName: 'union_info',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-      {
-        name: "fk_union_info_union1_idx",
-        using: "BTREE",
-        fields: [
-          { name: "union_id" },
-        ]
-      },
-    ]
-  });
+    );
+  }
+  static associate(db) {
+    // UnionInfo - Union (n:1)
+    db.UnionInfo.belongsTo(db.Union, {
+      foreignKey: "union_id",
+      targetKey: "id",
+    });
+  }
 };
