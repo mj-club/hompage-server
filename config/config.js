@@ -4,7 +4,7 @@ module.exports = {
   development: {
     username: process.env.DB_USERNAME_DEV,
     password: process.env.DB_PW_DEV,
-    database: "mju_club",
+    database: "mju_club_server_db",
     host: process.env.DB_HOST_DEV,
     dialect: "mysql",
     timezone: "+09:00",
