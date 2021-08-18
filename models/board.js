@@ -5,7 +5,7 @@ module.exports = class Board extends Sequelize.Model {
     return super.init(
       {
         name: { // 게시판 이름 
-          type: Sequelize.STRING(100),
+          type: Sequelize.STRING(45),
           allowNull: false
         },
       }, {
@@ -16,7 +16,7 @@ module.exports = class Board extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }
