@@ -1,41 +1,46 @@
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('union', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    name: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    introduction: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    tableName: 'union',
-    timestamps: false,
-    indexes: [
+
+module.exports = class Union extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
       {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-    ]
-  });
+        name: {
+          type: Sequelize.STRING(45),
+          allowNull: false
+        },
+        introduction: {
+          type: Sequelize.TEXT,
+          allowNull: true
+        },
+      }, {
+        sequelize,
+        modelName: "Union",
+        tableName: 'union',
+        timestamps: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicon"
+      }
+    );
+  }
+  static associate(db) {
+    // Union - UnionInfo (1:n)
+    db.Union.hasMany(db.UnionInfo, {
+      foreignKey: "union_id",
+      sourceKey: "id",
+    });
+
+    // Union - Board (1:n)
+    db.Union.hasMany(db.Board, {
+      foreignKey: "union_id",
+      sourceKey: "id",
+    });
+
+    // Union - User (1:1)
+    db.Union.belongsTo(db.User, {
+      foreignKey: "union_id",
+      sourceKey: "id",
+    });
+  }
 };

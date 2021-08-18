@@ -1,71 +1,43 @@
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('board', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    club_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      references: {
-        model: 'club',
-        key: 'id'
+
+module.exports = class Board extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
+      {
+        name: {
+          type: Sequelize.STRING(100),
+          allowNull: false
+        },
+      }, {
+        sequelize,
+        modelName: "Board",
+        tableName: 'board',
+        timestamps: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicon"
       }
-    },
-    union_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-      references: {
-        model: 'union',
-        key: 'id'
-      }
-    }
-  }, {
-    sequelize,
-    tableName: 'board',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-          { name: "club_id" },
-          { name: "union_id" },
-        ]
-      },
-      {
-        name: "fk_board_club1_idx",
-        using: "BTREE",
-        fields: [
-          { name: "club_id" },
-        ]
-      },
-      {
-        name: "fk_board_union1_idx",
-        using: "BTREE",
-        fields: [
-          { name: "union_id" },
-        ]
-      },
-    ]
-  });
+    );
+  }
+  static associate(db) {
+    // Board - Post (1:n)
+    db.Board.hasMany(db.Post, {
+      foreignKey: "board_id",
+      sourceKey: "id",
+    });
+
+    // Board - Club (n:1)
+    db.Board.belongsTo(db.Club, {
+      foreignKey: "club_id",
+      targetKey: "id",
+    });
+
+    // Board - Union (n:1)
+    db.Board.belongsTo(db.Union, {
+      foreignKey: "union_id",
+      targetKey: "id",
+    });
+  }
 };
+

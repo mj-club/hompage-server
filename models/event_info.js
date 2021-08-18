@@ -1,76 +1,54 @@
 const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('event_info', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    event_name: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    event_target: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    event_term: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    event_start: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    event_end: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    event_link: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    event_img: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    post_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'posts',
-        key: 'id'
+
+module.exports = class EventInfo extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
+      {
+        event_name: {
+          type: Sequelize.STRING(45),
+          allowNull: false
+        },
+        event_target: {
+          type: Sequelize.STRING(45),
+          allowNull: false
+        },
+        event_term: {
+          type: Sequelize.STRING(45),
+          allowNull: true
+        },
+        event_start: {
+          type: Sequelize.DATE,
+          allowNull: false
+        },
+        event_end: {
+          type: Sequelize.DATE,
+          allowNull: false
+        },
+        event_link: {
+          type: Sequelize.STRING(45),
+          allowNull: true
+        },
+        event_img: {
+          type: Sequelize.STRING(45),
+          allowNull: true
+        },
+      }, {
+        sequelize,
+        modelName: "EventInfo",
+        tableName: 'event_info',
+        timestamps: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicon"
       }
-    }
-  }, {
-    sequelize,
-    tableName: 'event_info',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-      {
-        name: "fk_event_info_posts1_idx",
-        using: "BTREE",
-        fields: [
-          { name: "post_id" },
-        ]
-      },
-    ]
-  });
+    );
+  }
+  static associate(db) {
+    // EventInfo - Post (n:1)
+    db.EventInfo.belongsTo(db.Post, {
+      foreignKey: "post_id",
+      targetKey: "id",
+    });
+  }
 };
