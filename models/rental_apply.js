@@ -20,7 +20,7 @@ module.exports = class RentalApply extends Sequelize.Model {
           type: Sequelize.DATE,
           allowNull: false
         },
-        rental_time: { // 대여 시간 (단위: 분)
+        rental_time: { // 대여 시간 (단위: 시간)
           type: Sequelize.INTEGER,
           allowNull: false
         },
@@ -32,7 +32,7 @@ module.exports = class RentalApply extends Sequelize.Model {
           type: Sequelize.INTEGER,
           allowNull: false
         },
-        apply_state: { // 대여 승인 여부 (1:승인. 0:반려)
+        apply_state: { // 대여 승인 여부 (2:반려, 1:승인. 0:대기)
           type: Sequelize.INTEGER,
           allowNull: false
         },
@@ -44,7 +44,7 @@ module.exports = class RentalApply extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }

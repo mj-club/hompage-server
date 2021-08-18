@@ -32,14 +32,14 @@ module.exports = class Schedule extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }
   static associate(db) {
     // Schedule - User (n:1)
     db.Schedule.belongsTo(db.User, {
-      foreignKey: "writer_id",
+      foreignKey: "user_id",
       targetKey: "id",
     });
   }
