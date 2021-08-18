@@ -1,65 +1,38 @@
-const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('sns', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    sns_type: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    sns_link: {
-      type: DataTypes.STRING(200),
-      allowNull: false
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    club_info_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'club_info',
-        key: 'id'
-      }
-    },
-    club_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: 'club_info',
-        key: 'club_id'
-      }
-    }
-  }, {
-    sequelize,
-    tableName: 'sns',
-    timestamps: false,
-    indexes: [
+const Sequelize = require("sequelize");
+
+module.exports = class Sns extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
       {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
+        sns_type: {
+          // Sns 타입 ex> Youtube, Instagram 등등
+          type: Sequelize.STRING(45),
+          allowNull: true,
+        },
+        sns_link: {
+          // Sns 주소
+          type: Sequelize.STRING(200),
+          allowNull: true,
+        },
       },
       {
-        name: "fk_sns_club_info1_idx",
-        using: "BTREE",
-        fields: [
-          { name: "club_info_id" },
-          { name: "club_id" },
-        ]
-      },
-    ]
-  });
+        sequelize,
+        modelName: "Sns",
+        tableName: "sns",
+        timestamp: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8mb4",
+        collate: "utf8mb4_unicode_ci",
+      }
+    );
+  }
+
+  static associate(db) {
+    // Sns - ClubInfo (1:1)
+    db.Sns.belongsTo(db.ClubInfo, {
+      foreignKey: "club_info_id",
+      targetKey: "id",
+    });
+  }
 };
