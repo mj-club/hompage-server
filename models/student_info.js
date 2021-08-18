@@ -1,49 +1,48 @@
-const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('student_info', {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    department: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    school_year: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    student_id: {
-      type: DataTypes.STRING(45),
-      allowNull: false
-    },
-    major: {
-      type: DataTypes.STRING(45),
-      allowNull: true
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false
-    }
-  }, {
-    sequelize,
-    tableName: 'student_info',
-    timestamps: false,
-    indexes: [
+const Sequelize = require("sequelize");
+
+module.exports = class StudentInfo extends Sequelize.Model {
+  static init(sequelize) {
+    return super.init(
       {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
+        department: {
+          // 소속 대학 ex> 인문대, ICT융합대
+          type: Sequelize.STRING(45),
+          allowNull: false,
+        },
+        major: {
+          // 전공
+          type: Sequelize.STRING(45),
+          allowNull: true,
+        },
+        school_year: {
+          // 학년
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        student_id: {
+          // 학번
+          type: Sequelize.STRING(45),
+          allowNull: true,
+        },
       },
-    ]
-  });
+      {
+        sequelize,
+        modelName: "StudentInfo",
+        tableName: "student_info",
+        timestamps: true,
+        underscored: true,
+        paranoid: false,
+        charset: "utf8",
+        collate: "utf8_general_ci",
+      }
+    );
+  }
+
+  static associate(db) {
+    // StudentInfo - User (1:1)
+    db.StudentInfo.belongsTo(db.User, {
+      foreignKey: "user_id",
+      targetKey: "id",
+    });
+  }
 };
