@@ -20,7 +20,7 @@ module.exports = class Union extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }
@@ -37,8 +37,8 @@ module.exports = class Union extends Sequelize.Model {
       sourceKey: "id",
     });
 
-    // Union - User (1:1)
-    db.Union.belongsTo(db.User, {
+    // Union - Manager (1:1)
+    db.Union.hasOne(db.Manager, {
       foreignKey: "union_id",
       sourceKey: "id",
     });

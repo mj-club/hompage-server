@@ -49,7 +49,7 @@ module.exports = class Club extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8",
-        collate: "utf8_general_ci",
+        collate: "utf8mb4_unicode_ci",
       }
     );
   }

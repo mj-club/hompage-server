@@ -16,7 +16,7 @@ module.exports = class Comment extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }

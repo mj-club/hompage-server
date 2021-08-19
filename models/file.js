@@ -12,7 +12,7 @@ module.exports = class File extends Sequelize.Model {
           type: Sequelize.STRING(100),
           allowNull: true
         },
-        original_url: { // 파일 전체 경로
+        original_url: { // 파일 경로
           type: Sequelize.STRING(100),
           allowNull: true
         },
@@ -28,7 +28,7 @@ module.exports = class File extends Sequelize.Model {
         underscored: true,
         paranoid: false,
         charset: "utf8mb4",
-        collate: "utf8mb4_unicon"
+        collate: "utf8mb4_unicode_ci"
       }
     );
   }
