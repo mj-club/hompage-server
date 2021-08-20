@@ -6,6 +6,6 @@ const AuthService = require("./auth");
 const service = {};
 
 // add
-repository.AuthService = AuthService;
+service.AuthService = AuthService;
 
 module.exports = service;

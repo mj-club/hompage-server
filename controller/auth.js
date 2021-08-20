@@ -1,4 +1,4 @@
-const { User } = require("../models");
+const { UserService } = require("../services");
 
 // 회원가입
 module.exports.join = () => {};
