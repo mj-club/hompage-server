@@ -1,7 +1,7 @@
-const express = require("express");
+const { File } = require("../models");
 
 // 파일 업로드
-exports.upload = async () => {};
+module.exports.upload = () => {};
 
 // 파일 삭제
-exports.delete = async () => {};
+module.exports.delete = () => {};
