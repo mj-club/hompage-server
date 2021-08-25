@@ -1,4 +1,4 @@
-const { Board, Post, Club, Union, UnionInfo, EventInfo, User } = require("../models");
+const { Board, Post, Club, Union, UnionInfo, User } = require("../models");
 const { NoSuchDataError } = require("../utils/handleError");
 
 // 게시판별 게시물 보여주기
@@ -58,8 +58,6 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
   let limit = 15;
   let skip = 0;
   let post;
-  let event;
-  let data = [];
   if (fetchCount > 1) {
     skip = limit * (fetchCount - 1);
   }
@@ -87,31 +85,6 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
     });
 
     if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-    
-    event = await EventInfo.findAll({ // post와의 관계...?????
-      attributes: [
-        "event_name",
-        "event_target",
-        "event_term",
-        "event_start",
-        "event_end"
-      ],
-      where: {
-        title: {
-          [Op.like]: "%" + keyword + "%",
-        },
-      },
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
-
-    if (!event) {
       const err = new Error();
       err.message = "db에 관련 정보가 없습니다.";
       err.status = 500;
@@ -152,38 +125,6 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
       err.status = 500;
       throw err;
     }
-    
-    event = await EventInfo.findAll({
-      attributes: [
-        "event_name",
-        "event_target",
-        "event_term",
-        "event_start",
-        "event_end"
-      ],
-      where: {
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + keyword + "%",
-            },
-            content: {
-              [Op.like]: "%" + keyword + "%",
-            },
-          },
-        ],
-      },
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
-
-    if (!event) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
   } 
   // 작성자명으로 검색
   else if (searchOption == "writer") {
@@ -213,9 +154,7 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
       throw err;
     }
   }
-  data.push({data_type: "post", data_list: post});
-  data.push({data_type: "event", data_list: event});
-  res.json(data);
+  return post;
 };
 
 // 특정 게시판에서 키워드로 검색하기
@@ -224,9 +163,7 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
   let limit = 15;
   let skip = 0;
   let post;
-  let event;
   let clubId = null;
-  let data = [];
   if (fetchCount > 1) {
     skip = limit * (fetchCount - 1);
   }
@@ -308,31 +245,6 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
       err.status = 500;
       throw err;
     }
-    
-    event = await EventInfo.findAll({ // post와의 관계...?????
-      attributes: [
-        "event_name",
-        "event_target",
-        "event_term",
-        "event_start",
-        "event_end"
-      ],
-      where: {
-        title: {
-          [Op.like]: "%" + keyword + "%",
-        },
-      },
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
-
-    if (!event) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
   } 
   // 제목 + 내용으로 검색
   else if (searchOption == "both") {
@@ -368,38 +280,6 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
       err.status = 500;
       throw err;
     }
-
-    event = await EventInfo.findAll({
-      attributes: [
-        "event_name",
-        "event_target",
-        "event_term",
-        "event_start",
-        "event_end"
-      ],
-      where: {
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + keyword + "%",
-            },
-            content: {
-              [Op.like]: "%" + keyword + "%",
-            },
-          },
-        ],
-      },
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
-    
-    if (!event) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
   } 
   // 작성자명으로 검색
   else if (searchOption == "writer") {
@@ -428,7 +308,5 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
       throw err;
     }
   }
-  data.push({data_type: "post", data_list: post});
-  data.push({data_type: "event", data_list: event});
-  res.json(data);
+  return post;
 };
