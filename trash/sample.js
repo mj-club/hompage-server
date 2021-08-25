@@ -89,3 +89,8 @@ function edit(data) {
 
 const board = await Board.findOne()
 return board.getPosts()
+
+
+const sampleFunction = new Promise();
+
+sampleFunction.then((resolve) => {console.log(resolve)}).catch((reject) => console.log(reject))
