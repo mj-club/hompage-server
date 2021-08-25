@@ -1,4 +1,11 @@
-const { User, StudentInfo, Schedule, Union, UnionInfo } = require("../models");
+const {
+	User,
+	StudentInfo,
+	Schedule,
+	Union,
+	UnionInfo,
+	Post,
+} = require("../models");
 
 // 프로필 정보 불러오기
 module.exports.getProfile = async (id) => {
@@ -233,7 +240,11 @@ module.exports.getAllSchedule = async (date, userId, unionId) => {
 };
 
 // 자유 게시물 등록하기
-module.exports.addFreePost = () => {};
+module.exports.addFreePost = async (formData) => {
+	const post = await Post.create({
+		title: formData.title,
+	});
+};
 
 // 동아리 문의사항 게시물 등록하기
 module.exports.addClubQuestionPost = () => {};
