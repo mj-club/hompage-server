@@ -32,4 +32,6 @@ module.exports.upload = async (model, files) => {
 };
 
 // 파일 삭제
-module.exports.delete = async (model) => {};
+module.exports.delete = (model) => {
+	model.getFiles().map((file) => file.destroy());
+};
