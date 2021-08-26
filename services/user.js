@@ -1,12 +1,16 @@
+// custom modules
 const {
 	User,
 	StudentInfo,
 	Schedule,
+	Club,
 	Union,
 	UnionInfo,
 	Post,
+	Board,
 } = require("../models");
-
+const { ExistUserError, NoSuchDataError } = require("../utils/handleError");
+const { File } = require("../utils");
 // 프로필 정보 불러오기
 module.exports.getProfile = async (id) => {
 	const user = await User.findOne({
@@ -77,7 +81,9 @@ module.exports.editProfile = async (userId, formData) => {
 };
 
 // 일정 추가하기
-module.exports.addSchedule = async (formData) => {
+module.exports.addSchedule = async (userId, formData) => {
+	const user = await User.findByPk(userId);
+
 	const schedule = await Schedule.create({
 		title: formData.title,
 		description: formData.description,
@@ -240,26 +246,265 @@ module.exports.getAllSchedule = async (date, userId, unionId) => {
 };
 
 // 자유 게시물 등록하기
-module.exports.addFreePost = async (formData) => {
-	const post = await Post.create({
-		title: formData.title,
-	});
+module.exports.addFreePost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "free" } }).then((obj) => (board = obj));
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
 };
 
+// 다시 작성
 // 동아리 문의사항 게시물 등록하기
-module.exports.addClubQuestionPost = () => {};
+module.exports.addClubQuestionPost = async (userId, belongName, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Club.findOne({ where: { name: belongName } }).then((clubObj) => {
+			Board.findOne({ where: { name: "question", club_id: clubObj.id } }).then(
+				(boardObj) => (board = boardObj)
+			);
+		});
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 총동연 문의사항 게시물 등록하기
-module.exports.addUnionQuestionPost = () => {};
+module.exports.addUnionQuestionPost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "question", union_id: 1 } }).then(
+			(obj) => (board = obj)
+		);
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 청원 게시물 등록하기
-module.exports.addPetitionPost = () => {};
+module.exports.addPetitionPost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "petition" } }).then((obj) => (board = obj));
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 게시물 수정하기
-module.exports.editPost = () => {};
+module.exports.editPost = (postId, formData) => {
+	let { title, thumbnail, content, set_top, files } = formData;
+	let post;
+
+	//init
+	const init = async () => {
+		post = await Post.findByPk(postId);
+	};
+	//execute
+	const execute = () => {
+		post.update({
+			title,
+			thumbnail,
+			content,
+			set_top: set_top,
+		});
+		if (await post.hasFiles()) {
+			await post.removeFiles();
+			if (files) {
+				File.upload(post, files);
+			}
+		}
+	};
+	//recall
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await execute();
+	await recall();
+
+	return post;
+};
 
 // 게시물 삭제하기
-module.exports.removePost = () => {};
+module.exports.removePost = () => {
+	let post;
+
+	//init
+	post = await Post.findByPk(postId);
+
+	//execute
+	await post.removeFiles();
+	await post.destroy();
+
+	//after
+	return post;
+};
 
 // 내가 쓴 게시물 모두 불러오기
 module.exports.getAllUserPost = () => {};

@@ -1,5 +1,5 @@
 const { json } = require("sequelize/types");
-const { Union, UnionInfo } = require("../models");
+const { Union, UnionInfo, Post, EventInfo } = require("../models");
 
 // 총동연 정보 추가하기
 module.exports.addUnionInfo = async (formData) => {
@@ -143,13 +143,177 @@ module.exports.removeClub = async (clubName) => {
 };
 
 // 공지사항 게시물 등록하기
-module.exports.addAnnouncementPost = () => {};
+module.exports.addAnnouncementPost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "announcement", union_id: 1 } }).then(
+			(obj) => (board = obj)
+		);
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 이벤트 게시물 등록하기
-module.exports.addEventPost = () => {};
+module.exports.addEventPost = async (userId, formData) => {
+	let {
+		title,
+		thumbnail,
+		content,
+		files,
+		event_name,
+		event_target,
+		event_term,
+		event_start,
+		event_end,
+		event_link,
+	} = formData;
+	let user, board, post, eventInfo;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "event" } }).then((obj) => (board = obj));
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+
+		EventInfo.create({
+			event_name,
+			event_target,
+			event_term,
+			event_start,
+			event_end,
+			event_link,
+		}).then((obj) => (eventInfo = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		post.addEventInfo(eventInfo);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: EventInfo, required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 월별활동 게시물 등록하기
-module.exports.addMonthlyKeyumPost = () => {};
+module.exports.addMonthlyKeyumPost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Board.findOne({ where: { name: "monthly_keyum" } }).then(
+			(obj) => (board = obj)
+		);
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 부적절한 게시물 삭제
 module.exports.removeOtherPost = () => {};

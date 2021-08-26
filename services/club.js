@@ -1,4 +1,4 @@
-const { Club, ClubInfo, Member } = require("../models");
+const { Club, ClubInfo, Member, Manager } = require("../models");
 
 // 동아리 정보 불러오기
 module.exports.getClubInfo = async (formData) => {
@@ -167,7 +167,57 @@ module.exports.getAllMember = async (clubName) => {
 };
 
 // 공지사항 게시물 등록하기
-module.exports.addAnnouncementPost = () => {};
+module.exports.addAnnouncementPost = async (userId, formData) => {
+	let { title, thumbnail, content, files } = formData;
+	let user, board, post;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Manager.findOne({ where: { user_id: userId } }).then((manager) => {
+			Board.findOne({
+				where: { name: "announcement", club_id: manager.club_id },
+			}).then((obj) => (board = obj));
+		});
+	};
+
+	const create = () => {
+		Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
+	};
+
+	const associate = () => {
+		post.addUser(user);
+		post.addBoard(board);
+		if (files) {
+			File.upload(post, files);
+		}
+	};
+
+	const recall = async () => {
+		const id = post.id;
+		post = await Post.findByPk(id, {
+			include: [
+				{ model: User, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+				{ model: File, required: false },
+			],
+		});
+	};
+
+	await init();
+	await create();
+	await associate();
+	await recall();
+
+	return post;
+};
 
 // 동아리 게시판 내 게시물 삭제
 module.exports.removePostInClub = () => {};
