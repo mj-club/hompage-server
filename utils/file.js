@@ -32,4 +32,4 @@ module.exports.upload = async (model, files) => {
 };
 
 // 파일 삭제
-module.exports.delete = () => {};
+module.exports.delete = async (model) => {};

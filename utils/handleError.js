@@ -13,3 +13,11 @@ module.exports.NoSuchDataError = (errorMessage) => {
 	err.status = 404;
 	return err;
 };
+
+module.exports.NoPermissionError = (errorMessage) => {
+	const err = new 
+	err.name = "NoPermissionError";
+	err.message = errorMessage;
+	err.status = 403;
+	return err;
+};
