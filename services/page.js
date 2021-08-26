@@ -78,7 +78,9 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
       },
       include: [{ model: Club, attributes: ["name"], required: false },
       { model: UnionInfo, attributes: ["name"], required: false },
-      { model: Board, attributes: ["name"], required: false }],
+      { model: Board, attributes: ["name"], required: false },
+    ],
+
       order: [["created_at", "DESC"]],
       offset: skip,
       limit: limit,
