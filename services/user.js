@@ -9,6 +9,7 @@ const {
 	UnionInfo,
 	Post,
 	Board,
+	Comment,
 } = require("../models");
 const { ExistUserError, NoSuchDataError } = require("../utils/handleError");
 const { File } = require("../utils");
@@ -41,7 +42,17 @@ module.exports.getProfile = async (id) => {
 
 // 프로필 정보 수정하기
 module.exports.editProfile = async (userId, formData) => {
-	const {email, name, password, ph_number, provider, department, major, school_year, student_id} = formData;
+	const {
+		email,
+		name,
+		password,
+		ph_number,
+		provider,
+		department,
+		major,
+		school_year,
+		student_id,
+	} = formData;
 	const user = await User.findOne({
 		where: { id: userId },
 	});
@@ -69,14 +80,14 @@ module.exports.editProfile = async (userId, formData) => {
 		name,
 		password,
 		ph_number,
-		provider
+		provider,
 	});
 
 	const updateStudentInfo = await student.update({
 		department,
 		major,
 		school_year,
-		student_id
+		student_id,
 	});
 
 	return { updateUser, updateStudentInfo };
@@ -84,19 +95,19 @@ module.exports.editProfile = async (userId, formData) => {
 
 // 일정 추가하기
 module.exports.addSchedule = async (formData, userId) => {
-	const {title, description, start, end, all_day_long, provider} = formData;
+	const { title, description, start, end, all_day_long, provider } = formData;
 	const schedule = await Schedule.create({
 		title,
 		description,
 		start,
 		end,
 		all_day_long,
-		provider
+		provider,
 	});
 
 	// 계정 타입확인
 	const typeManager = Manager.findOne({
-		where: { users_id: userId }
+		where: { users_id: userId },
 	});
 
 	if (!typeManager) {
@@ -109,22 +120,22 @@ module.exports.addSchedule = async (formData, userId) => {
 	// 동아리 계정
 	if (typeManager.club_id) {
 		const club = await Club.findOne({
-			where: {id: typeManager.club_id}
-		});	
+			where: { id: typeManager.club_id },
+		});
 		await club.addSchedule(schedule);
 	}
 	// 총동연 계정
 	else if (typeManager.union_id) {
 		const union = await UnionInfo.findOne({
-			where: {id: typeManager.union_id}
-		});	
+			where: { id: typeManager.union_id },
+		});
 		await union.addSchedule(schedule);
 	}
 	// 개인 계정
 	else {
 		const user = await User.findOne({
-			where: {id: userId}
-		});	
+			where: { id: userId },
+		});
 		await user.addSchedule(schedule);
 	}
 
@@ -133,7 +144,7 @@ module.exports.addSchedule = async (formData, userId) => {
 
 // 일정 수정하기
 module.exports.editSchedule = async (scheduleId, formData) => {
-	const {title, description, start, end, all_day_long, provider} = formData;
+	const { title, description, start, end, all_day_long, provider } = formData;
 	const schedule = await Schedule.findOne({
 		where: { id: scheduleId },
 	});
@@ -151,7 +162,7 @@ module.exports.editSchedule = async (scheduleId, formData) => {
 		start,
 		end,
 		all_day_long,
-		provider
+		provider,
 	});
 
 	return schedule;
@@ -196,7 +207,7 @@ module.exports.getSchedule = async (date, scheduleId) => {
 	let data = await Schedule.findAll({
 		attributes: ["title", "description", "start", "end", "all_day_long"],
 		where: {
-			id = scheduleId,
+			id: scheduleId,
 			start: {
 				[Op.gte]: Date.parse(startDate),
 				[Op.lt]: Date.parse(endDate),
@@ -234,15 +245,15 @@ module.exports.getAllSchedule = async (date, userId) => {
 	let endDate = date.substr(0, 4) + "-" + String(uptoMonth) + "-01";
 	console.log("조회날짜 >> ", startDate, " ~ ", endDate);
 
-	// 개인, 동아리, 총동연 일정 모두 불러오기 
+	// 개인, 동아리, 총동연 일정 모두 불러오기
 	// (개인 계정의 경우 개인 일정만)
 	// (관리자 계정의 경우 해당 동아리 및 총동연 일정만)
 	let data;
 	const typeManager = Manager.findOne({
-		where: { users_id: userId }
+		where: { users_id: userId },
 	});
 
-	// err 
+	// err
 	if (!typeManager) {
 		const err = new Error();
 		err.message = "db에 관련 정보가 없습니다.";
@@ -254,7 +265,7 @@ module.exports.getAllSchedule = async (date, userId) => {
 	if (typeManager.club_id) {
 		// const club = await Club.findOne({
 		// 	where: {id: typeManager.club_id}
-		// });	
+		// });
 		// data = await club.getSchedule();
 		data = await Schedule.findAll({
 			attributes: ["title", "description", "start", "end", "all_day_long"],
@@ -272,7 +283,7 @@ module.exports.getAllSchedule = async (date, userId) => {
 	else if (typeManager.union_id) {
 		// const union = await UnionInfo.findOne({
 		// 	where: {id: typeManager.union_id}
-		// });	
+		// });
 		// data = await union.getSchedule();
 		data = await Schedule.findAll({
 			attributes: ["title", "description", "start", "end", "all_day_long"],
@@ -290,12 +301,16 @@ module.exports.getAllSchedule = async (date, userId) => {
 	else {
 		// const user = await User.findOne({
 		// 	where: {id: userId}
-		// });	
+		// });
 		// data = await user.getSchedule();
 		data = await Schedule.findAll({
 			attributes: ["title", "description", "start", "end", "all_day_long"],
 			where: {
-				[Op.or]: [{user_id: userId}, {club_id: clubId}, {union_id: unionId}],
+				[Op.or]: [
+					{ user_id: userId },
+					{ club_id: clubId },
+					{ union_id: unionId },
+				],
 				start: {
 					[Op.gte]: Date.parse(startDate),
 					[Op.lt]: Date.parse(endDate),
@@ -537,7 +552,7 @@ module.exports.editPost = (postId, formData) => {
 			set_top: set_top,
 		});
 		if (await post.hasFiles()) {
-			await post.removeFiles();
+			await File.delete(post);
 			if (files) {
 				File.upload(post, files);
 			}
@@ -563,18 +578,64 @@ module.exports.editPost = (postId, formData) => {
 };
 
 // 게시물 삭제하기
-module.exports.removePost = () => {
+module.exports.removePost = async (postId) => {
 	let post;
 
 	//init
 	post = await Post.findByPk(postId);
 
 	//execute
-	await post.removeFiles();
+	await File.delete(post);
 	await post.destroy();
 
 	//after
 	return post;
+};
+
+// 댓글 작성
+module.exports.addComment = async (userId, postId, formData) => {
+	let { content } = formData;
+	let user, post, comment;
+
+	const init = () => {
+		User.findByPk(userId).then((obj) => (user = obj));
+		Post.findByPk(postId).then((obj) => (post = user));
+	};
+
+	const create = () => {
+		Comment.create({ content }).then((obj) => (comment = obj));
+	};
+
+	const associate = () => {
+		comment.addPost(post);
+	};
+
+	await init();
+	await create();
+	await associate();
+
+	return comment;
+};
+
+// 댓글 수정
+module.exports.editComment = async (commentId, formData) => {
+	let { content } = formData;
+	let comment;
+	// init
+	let comment = await Comment.findByPk(commentId);
+
+	// create
+	comment = await comment.update({ content });
+
+	return comment;
+};
+
+// 댓글 삭제
+module.exports.removeComment = async (commentId) => {
+	let comment;
+
+	comment = await Comment.destroy({ where: { id: commentId } });
+	return comment;
 };
 
 // 내가 쓴 게시물 모두 불러오기

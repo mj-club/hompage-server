@@ -315,8 +315,27 @@ module.exports.addMonthlyKeyumPost = async (userId, formData) => {
 	return post;
 };
 
+// 추가 설정 필요
 // 부적절한 게시물 삭제
-module.exports.removeOtherPost = () => {};
+module.exports.removeOtherPost = async (postId) => {
+	let post;
 
+	//init
+	post = await Post.findByPk(postId);
+
+	//execute
+	await File.delete(post);
+	await post.destroy();
+
+	//after
+	return post;
+};
+
+// 추가 설정 필요
 // 부적절한 댓글 삭제
-module.exports.removeOtherComment = () => {};
+module.exports.removeOtherComment = async (commentId) => {
+	let comment;
+
+	comment = await Comment.destroy({ where: { id: commentId } });
+	return comment;
+};

@@ -1,4 +1,5 @@
-const { Club, ClubInfo, Member, Manager } = require("../models");
+const { Club, ClubInfo, Member, Manager, Post, Comment } = require("../models");
+const { NoPermissionError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
 module.exports.getClubInfo = async (formData) => {
@@ -219,8 +220,79 @@ module.exports.addAnnouncementPost = async (userId, formData) => {
 	return post;
 };
 
+// 추가 설정 필요
 // 동아리 게시판 내 게시물 삭제
-module.exports.removePostInClub = () => {};
+module.exports.removePostInClub = async (userId, postId) => {
+	let post, clubIdByManager, clubIdByBoard;
 
+	//init
+	const init = () => {
+		Post.findByPk(postId)
+			.then((obj) => (post = obj))
+			.then(() => {
+				post.getBoard().then((board) => (clubIdByBoard = board.club_id));
+			});
+		Manager.findOne({ where: { user_id: userId } }).then(
+			(manager) => (clubIdByManager = manager.club_id)
+		);
+	};
+
+	//check
+	const check = () => {
+		if (clubIdByBoard === clubIdByManager) {
+			return true;
+		} else {
+			const err = NoPermissionError(
+				"해당 게시물을 삭제할 수 있는 관리자 계정이 아닙니다."
+			);
+			throw err;
+		}
+	};
+
+	//execute
+	const execute = async () => {
+		await File.delete(post);
+		await post.destroy();
+	};
+
+	await init();
+	await check();
+	await execute();
+
+	//after
+	return true;
+};
+
+// 추가 설정 필요
 // 동아리 게시물 내 댓글 삭제
-module.exports.removeCommentInClub = () => {};
+module.exports.removeCommentInClub = async (userId, commentId) => {
+	let comment, clubIdByManager, clubIdByBoard;
+
+	const init = () => {
+		Comment.findByPk(commentId)
+			.then((obj) => (comment = obj))
+			.then(() => {
+				comment
+					.getPost()
+					.getBoard()
+					.then((board) => (clubIdByBoard = board.club_id));
+			});
+		Manager.findOne({ where: { user_id: userId } }).then(
+			(manager) => (clubIdByManager = manager.club_id)
+		);
+	};
+	const check = () => {
+		if (clubIdByBoard === clubIdByManager) {
+			return true;
+		} else {
+			const err = NoPermissionError(
+				"해당 댓글을 삭제할 수 있는 관리자 계정이 아닙니다."
+			);
+			throw err;
+		}
+	};
+	const execute = () => {
+		await comment.destroy();
+	};
+	return true;
+};
