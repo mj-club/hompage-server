@@ -639,7 +639,33 @@ module.exports.removeComment = async (commentId) => {
 };
 
 // 내가 쓴 게시물 모두 불러오기
-module.exports.getAllUserPost = () => {};
+module.exports.getAllUserPost = async (userId) => {
+	const post = await Post.findAll({
+		attributes: [
+			"title",
+			"thumbnail",
+			"content",
+			"board_id"
+		],
+		where: { writer_id: userId }
+	});
+
+	return post;
+};
 
 // 내가 쓴 댓글 모두 불러오기
-module.exports.getAllUserComment = () => {};
+module.exports.getAllUserComment = async(userId) => {
+	const comment = await Comment.findAll({
+		attributes: [
+			"content"
+		],
+		where: { writer_id: userId }
+	});
+
+	return comment;
+
+	// 댓글로 게시물을 불러올경우
+	// const post = await Post.findOne({
+	// 	where: { post_id: comment.post_id }
+	// });
+};
