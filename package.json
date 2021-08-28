@@ -6,7 +6,8 @@
   "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=production PORT=8080 pm2 start app.js -i 0",
-    "dev": "nodemon app"
+    "dev": "nodemon app",
+    "test": "mocha"
   },
   "dependencies": {
     "aws-sdk": "^2.951.0",
@@ -41,6 +42,7 @@
     "winston": "^3.3.3"
   },
   "devDependencies": {
+    "mocha": "^9.1.1",
     "nodemon": "^2.0.7"
   }
 }
