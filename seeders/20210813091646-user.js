@@ -1,7 +1,7 @@
 "use strict";
 require("dotenv").config("../.env");
 const bcrypt = require("bcrypt");
-const clubs = require("../data/seeders");
+const clubs = require("../data/clubs");
 
 //난수 생성
 function generateRandomCode(n) {
@@ -11,6 +11,17 @@ function generateRandomCode(n) {
 	}
 	return str;
 }
+
+// 게시판 생성
+const createBoardObj = (name, id, isClub = true) => {
+	return {
+		name,
+		created_at: new Date(),
+		updated_at: new Date(),
+		club_id: clubId,
+		unionId: unionId,
+	};
+};
 
 module.exports = {
 	up: async (queryInterface, Sequelize) => {
@@ -34,6 +45,10 @@ module.exports = {
 		// DB테이블 하나 더 만들어서 암호화 되지 않은 비번을 추가로 저장
 		let userDatas = [];
 		let clubAuthDatas = [];
+		let clubDatas = [];
+		let boardDatas = [];
+		let managerDatas = [];
+
 		await Promise.all(
 			clubs.map(async (club) => {
 				console.log(club.code, club.name);
@@ -41,7 +56,7 @@ module.exports = {
 				const hash = await bcrypt.hash(password, 12);
 				let userObj = {
 					email: club.code + "@mjuclub.com",
-					name: club.name + "",
+					name: club.name,
 					password: hash,
 					ph_number: "01012345678",
 					created_at: new Date(),
@@ -65,11 +80,54 @@ module.exports = {
 					// .replace(/T/, " ")
 					// .replace(/\..+/, ""),
 				};
-				// console.log(userObj.password);
+
 				userDatas.push(userObj);
 				clubAuthDatas.push(clubAuthObj);
 			})
 		);
+
+		queryInterface.bulkInsert("club_auth", clubAuthDatas);
+		await queryInterface.bulkInsert("users", userDatas);
+
+		let users = await queryInterface.sequelize.query(
+			`SELECT id, name FROM users;`
+		);
+		users = users[0];
+		users.map((user) => {
+			let clubObj = {
+				name: user.name,
+				created_at: new Date(),
+				// .toISOString()
+				// .replace(/T/, " ")
+				// .replace(/\..+/, ""),
+				updated_at: new Date(),
+				// .toISOString()
+				// .replace(/T/, " ")
+				// .replace(/\..+/, ""),
+			};
+			clubDatas.push(clubObj);
+		});
+
+		await queryInterface.bulkInsert("clubs", clubDatas);
+
+		let clubs = await queryInterface.sequelize.query(
+			`SELECT id, name FROM clubs;`
+		);
+		clubs = clubs[0];
+
+		clubs.map((club) => {
+			let announcementBoard = createBoardObj("announcement", club.id);
+			let questionBoard = createBoardObj("question", club.id);
+			boardDatas.push(announcementBoard, questionBoard);
+
+			const userId = users.filter((user) => user.name === club.name)[0].id;
+			let managerObj = {
+				user_id: userId,
+				club_id: club.id,
+			};
+			managerDatas.push(managerObj);
+		});
+
 		let unionPassword = await bcrypt.hash(process.env.MAILER_PW, 12);
 		let unionUser = {
 			email: process.env.MAILER_MAIL,
@@ -79,10 +137,32 @@ module.exports = {
 			created_at: new Date(),
 			updated_at: new Date(),
 		};
-		userDatas.push(unionUser);
+		await queryInterface.bulkInsert("users", unionUser);
+		let union = await queryInterface.sequelize.query(
+			`SELECT id FROM users WHERE name=총동아리연합회;`
+		);
+		union = union[0][0];
+		let announcementBoard = createBoardObj("announcement", union.id, false);
+		let questionBoard = createBoardObj("question", union.id, false);
+		let eventBoard = createBoardObj("event", union.id, false);
+		let monthlyKeyumBoard = createBoardObj("monthlyKeyum", union.id, false);
+		let petitionBoard = createBoardObj("petition", union.id, false);
+		boardDatas.push(
+			announcementBoard,
+			questionBoard,
+			eventBoard,
+			monthlyKeyumBoard,
+			petitionBoard
+		);
 
-		await queryInterface.bulkInsert("users", userDatas, {});
-		await queryInterface.bulkInsert("club_auth", clubAuthDatas, {});
+		let managerObj = {
+			user_id: userId,
+			union_id: union.id,
+		};
+		managerDatas.push(managerObj);
+
+		queryInterface.bulkInsert("board", boardDatas);
+		queryInterface.bulkInsert("managers", managerDatas);
 	},
 
 	down: async (queryInterface, Sequelize) => {
