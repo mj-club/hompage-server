@@ -1,7 +1,7 @@
 "use strict";
 require("dotenv").config("../.env");
 const bcrypt = require("bcrypt");
-const clubs = require("../data/clubs");
+const clubSets = require("../data/clubs");
 
 //난수 생성
 function generateRandomCode(n) {
@@ -14,13 +14,19 @@ function generateRandomCode(n) {
 
 // 게시판 생성
 const createBoardObj = (name, id, isClub = true) => {
-	return {
-		name,
-		created_at: new Date(),
-		updated_at: new Date(),
-		club_id: clubId,
-		unionId: unionId,
-	};
+	return isClub
+		? {
+				name,
+				created_at: new Date(),
+				updated_at: new Date(),
+				club_id: id,
+		  }
+		: {
+				name,
+				created_at: new Date(),
+				updated_at: new Date(),
+				union_id: id,
+		  };
 };
 
 module.exports = {
@@ -50,7 +56,7 @@ module.exports = {
 		let managerDatas = [];
 
 		await Promise.all(
-			clubs.map(async (club) => {
+			clubSets.map(async (club) => {
 				console.log(club.code, club.name);
 				const password = club.code + generateRandomCode(4);
 				const hash = await bcrypt.hash(password, 12);
@@ -89,11 +95,11 @@ module.exports = {
 		queryInterface.bulkInsert("club_auth", clubAuthDatas);
 		await queryInterface.bulkInsert("users", userDatas);
 
-		let users = await queryInterface.sequelize.query(
+		let clubUsers = await queryInterface.sequelize.query(
 			`SELECT id, name FROM users;`
 		);
-		users = users[0];
-		users.map((user) => {
+		clubUsers = clubUsers[0];
+		clubUsers.map((user) => {
 			let clubObj = {
 				name: user.name,
 				created_at: new Date(),
@@ -107,8 +113,15 @@ module.exports = {
 			};
 			clubDatas.push(clubObj);
 		});
-
 		await queryInterface.bulkInsert("clubs", clubDatas);
+		queryInterface.bulkInsert("union", [
+			{
+				name: "총동아리연합회",
+				// introduction: "안녕하세요, 총동아리연합회입니다.",
+				created_at: new Date(),
+				updated_at: new Date(),
+			},
+		]);
 
 		let clubs = await queryInterface.sequelize.query(
 			`SELECT id, name FROM clubs;`
@@ -120,14 +133,15 @@ module.exports = {
 			let questionBoard = createBoardObj("question", club.id);
 			boardDatas.push(announcementBoard, questionBoard);
 
-			const userId = users.filter((user) => user.name === club.name)[0].id;
+			const userId = clubUsers.filter((user) => user.name === club.name)[0].id;
 			let managerObj = {
 				user_id: userId,
 				club_id: club.id,
+				created_at: new Date(),
+				updated_at: new Date(),
 			};
 			managerDatas.push(managerObj);
 		});
-
 		let unionPassword = await bcrypt.hash(process.env.MAILER_PW, 12);
 		let unionUser = {
 			email: process.env.MAILER_MAIL,
@@ -137,16 +151,17 @@ module.exports = {
 			created_at: new Date(),
 			updated_at: new Date(),
 		};
-		await queryInterface.bulkInsert("users", unionUser);
-		let union = await queryInterface.sequelize.query(
-			`SELECT id FROM users WHERE name=총동아리연합회;`
+		await queryInterface.bulkInsert("users", [unionUser]);
+		unionUser = await queryInterface.sequelize.query(
+			`SELECT id FROM users WHERE name='총동아리연합회';`
 		);
-		union = union[0][0];
-		let announcementBoard = createBoardObj("announcement", union.id, false);
-		let questionBoard = createBoardObj("question", union.id, false);
-		let eventBoard = createBoardObj("event", union.id, false);
-		let monthlyKeyumBoard = createBoardObj("monthlyKeyum", union.id, false);
-		let petitionBoard = createBoardObj("petition", union.id, false);
+		unionUser = unionUser[0][0];
+		console.log(unionUser);
+		let announcementBoard = createBoardObj("announcement", 1, false);
+		let questionBoard = createBoardObj("question", 1, false);
+		let eventBoard = createBoardObj("event", 1, false);
+		let monthlyKeyumBoard = createBoardObj("monthlyKeyum", 1, false);
+		let petitionBoard = createBoardObj("petition", 1, false);
 		boardDatas.push(
 			announcementBoard,
 			questionBoard,
@@ -156,11 +171,14 @@ module.exports = {
 		);
 
 		let managerObj = {
-			user_id: userId,
-			union_id: union.id,
+			user_id: unionUser.id,
+			union_id: 1,
+			created_at: new Date(),
+			updated_at: new Date(),
 		};
 		managerDatas.push(managerObj);
 
+		console.log("done");
 		queryInterface.bulkInsert("board", boardDatas);
 		queryInterface.bulkInsert("managers", managerDatas);
 	},
