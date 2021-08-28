@@ -41,7 +41,7 @@ const logger = require("./logger");
 
 // init express app
 const app = express();
-passportConfig();
+// passportConfig();
 app.set("port", process.env.PORT || 3001);
 
 // init sequelize
@@ -148,3 +148,14 @@ app.listen(app.get("port"), () => {
 		process.env.NODE_ENV
 	);
 });
+
+
+// 테스트 전용
+module.exports = {
+  sayHello: function () {
+    return 'hello';
+  },
+  addNumbers: function (a, b) {
+    return a + b;
+  }
+};

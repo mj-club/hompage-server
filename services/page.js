@@ -66,6 +66,7 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
   if (searchOption == "title") {
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",
@@ -97,6 +98,7 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
   else if (searchOption == "both") {
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",
@@ -136,6 +138,7 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
     });
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",
@@ -224,6 +227,7 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
   if (searchOption == "title") {
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",
@@ -252,6 +256,7 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
   else if (searchOption == "both") {
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",
@@ -291,6 +296,7 @@ module.exports.searchByBoard = async (keyword, searchOption, page, boardName, cl
     });
     post = await Post.findAll({
       attributes: [
+        "id",
         "title",
         "thumbnail",
         "content",

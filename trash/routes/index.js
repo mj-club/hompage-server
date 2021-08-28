@@ -10,7 +10,5 @@ router.get("/", function (req, res, next) {
   res.sendFile(index);
 });
 
-// 게시판 보여주기
-router.get('/board/:belong/:board', UserController)
 
 module.exports = router;
