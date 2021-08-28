@@ -1,11 +1,4 @@
-"use strict";
+const {} = require("../services");
 
-// import
-const AuthController = require("./auth");
-
-const controller = {};
-
-// add
-controller.AuthController = AuthController;
-
-module.exports = controller;
+// 게시판 보여주기
+module.exports.showBoard = (res, req, next) => {};

@@ -214,7 +214,6 @@ router.post(
 
 // 이메일 찾기
 router.post(
-<<<<<<< HEAD
 	"/findEmail",
 	isNotLoggedIn,
 	multer().none(),
@@ -239,38 +238,11 @@ router.post(
 			res.send(error);
 		}
 	}
-=======
-  "/findEmail",
-  isNotLoggedIn,
-  multer().none(),
-  async (req, res, next) => {
-    try {
-      const userEmail = await User.findOne({
-        attributes: ["email"],
-        where: { name: req.body.name, student_id: req.body.student_id },
-      });
-      const finded = JSON.stringify(userEmail.email);
-      const loc = finded.indexOf("@");
-      const processed =
-        finded.substring(1, loc - 3) +
-        "***" +
-        finded.substring(loc, finded.length - 1);
-
-      console.log("이메일을 찾았어요!");
-      res.json(processed);
-    } catch (error) {
-      console.log("이메일을 찾지 못했어요...");
-      console.error(error);
-      res.send(error);
-    }
-  }
->>>>>>> 0cd710966b43219db606b26e69c655c3bf838dcc
 );
 
 router.get("/kakao", passport.authenticate("kakao"));
 
 router.get(
-<<<<<<< HEAD
 	"/kakao/callback",
 	passport.authenticate("kakao", {
 		failureRedirect: "/",
@@ -383,119 +355,5 @@ router.post("/resetPW/:token", multer().none(), async (req, res) => {
 	} catch (error) {
 		res.send(error);
 	}
-=======
-  "/kakao/callback",
-  passport.authenticate("kakao", {
-    failureRedirect: "/",
-  }),
-  (req, res) => {
-    console.log(req.user);
-    res.json(req.user);
-  }
-);
-
-router.post("/findPW", multer().none(), async (req, res) => {
-  // email 입력 확인
-  if (req.body.email === "") {
-    res.status(400).send("email required");
-  }
-  const crypto = require("crypto");
-  // 유저 데이터베이스에 존재하는 이메일인지 확인
-  try {
-    const user = await User.findOne({
-      where: {
-        email: req.body.email,
-        name: req.body.name,
-        ph_number: req.body.ph_number,
-      },
-    });
-    console.log(user === null);
-    if (user === null) {
-      const err = new Error("가입되지 않은 회원입니다.");
-      err.name = "NoUserError";
-      res.json(err);
-    }
-    const token = crypto.randomBytes(20).toString("hex"); // token 생성
-    const data = {
-      // 데이터 정리
-      token,
-      user_id: user.id,
-      ttl: 5000, // ttl 값 설정 (5분)
-    };
-    console.log(data);
-    const auth = await Auth.create(data);
-    console.log(auth);
-    // nodemailer Transport 생성
-    // email example: dsfsa@naver.com
-    const host = user.email.split("@")[1];
-    const transporter = nodemailer.createTransport({
-      // host,
-      service: "gmail",
-      port: 465,
-      // port: "587",
-      secure: true, // true for 465, false for other ports
-      auth: {
-        // 이메일을 보낼 계정 데이터 입력
-        user: process.env.MAILER_MAIL,
-        pass: process.env.MAILER_PW,
-      },
-    });
-    console.log(user.email, user.password);
-    const resetPWLink =
-      process.env.NODE_ENV === "production"
-        ? `http://13.209.214.244:8080/resetPW/${token}`
-        : `<a href="http://localhost:3001/resetPW/${token}">http://localhost/resetPW</a>`;
-    const emailOptions = {
-      // 옵션값 설정
-      from: "명지대학교 인문캠퍼스 총동아리연합회",
-      to: user.email,
-      subject: "비밀번호 초기화 이메일입니다.",
-      html:
-        "비밀번호 초기화를 위해서는 아래의 URL을 클릭하여 주세요." +
-        resetPWLink,
-    };
-    transporter
-      .sendMail(emailOptions)
-      .then((info) => {
-        console.log(info);
-        res.send(info);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.send(err);
-      }); //전송
-    // 데이터베이스 Auth 테이블에 데이터 입력
-  } catch (error) {
-    res.send(error);
-  }
-});
-
-router.post("/resetPW/:token", multer().none(), async (req, res) => {
-  if (req.body.newPW === undefined) {
-    res.status(400).send("new password required");
-  }
-
-  // 입력받은 token 값이 Auth 테이블에 존재하며 아직 유효한지 확인
-  try {
-    const auth = await Auth.findOne({
-      where: {
-        token: req.params.token,
-        created_at: {
-          [Op.gt]: new Date(new Date() - 5 * 60 * 1000),
-        },
-      },
-    });
-    console.log(auth);
-    const user = await User.findByPk(auth.user_id);
-    const hash = await bcrypt.hash(req.body.newPW, 12);
-    await user.update({
-      password: hash,
-    });
-    console.log(user);
-    res.json("complete");
-  } catch (error) {
-    res.send(error);
-  }
->>>>>>> 0cd710966b43219db606b26e69c655c3bf838dcc
 });
 module.exports = router;
