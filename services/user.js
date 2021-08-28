@@ -642,9 +642,9 @@ module.exports.removeComment = async (commentId) => {
 module.exports.getAllUserPost = async (userId) => {
 	const post = await Post.findAll({
 		attributes: [
+			"id",
 			"title",
 			"thumbnail",
-			"content",
 			"board_id"
 		],
 		where: { writer_id: userId }
@@ -657,9 +657,11 @@ module.exports.getAllUserPost = async (userId) => {
 module.exports.getAllUserComment = async(userId) => {
 	const comment = await Comment.findAll({
 		attributes: [
+			"id",
 			"content"
 		],
-		where: { writer_id: userId }
+		where: { writer_id: userId },
+		include: [{model: Post, attributes: ["id", "title", "thumbnail", "board_id"], required: false}]
 	});
 
 	return comment;
