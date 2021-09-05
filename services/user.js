@@ -11,7 +11,11 @@ const {
 	Board,
 	Comment,
 } = require("../models");
-const { ExistUserError, NoSuchDataError } = require("../utils/handleError");
+const {
+	ExistUserError,
+	NoSuchDataError,
+	NoPermissionError,
+} = require("../utils/handleError");
 const { File } = require("../utils");
 // 프로필 정보 불러오기
 module.exports.getProfile = async (id) => {
@@ -578,18 +582,38 @@ module.exports.editPost = (postId, formData) => {
 };
 
 // 게시물 삭제하기
-module.exports.removePost = async (postId) => {
-	let post;
+module.exports.removePost = async (userId, postId) => {
+	let post, user;
 
 	//init
-	post = await Post.findByPk(postId);
+	const init = () => {
+		Post.findByPk(postId).then((obj) => (post = obj));
+		User.findByPk(userId).then((obj) => (user = obj));
+	};
 
+	//check
+	const check = async () => {
+		if (await user.hasPost(post)) {
+			return true;
+		} else {
+			const err = NoPermissionError(
+				"해당 게시물을 삭제할 수 있는 관리자 계정이 아닙니다."
+			);
+			throw err;
+		}
+	};
 	//execute
-	await File.delete(post);
-	await post.destroy();
+	const execute = async () => {
+		await File.delete(post);
+		await post.destroy();
+	};
+
+	await init();
+	await check();
+	await execute();
 
 	//after
-	return post;
+	return true;
 };
 
 // 댓글 작성
@@ -641,27 +665,25 @@ module.exports.removeComment = async (commentId) => {
 // 내가 쓴 게시물 모두 불러오기
 module.exports.getAllUserPost = async (userId) => {
 	const post = await Post.findAll({
-		attributes: [
-			"id",
-			"title",
-			"thumbnail",
-			"board_id"
-		],
-		where: { writer_id: userId }
+		attributes: ["id", "title", "thumbnail", "board_id"],
+		where: { writer_id: userId },
 	});
 
 	return post;
 };
 
 // 내가 쓴 댓글 모두 불러오기
-module.exports.getAllUserComment = async(userId) => {
+module.exports.getAllUserComment = async (userId) => {
 	const comment = await Comment.findAll({
-		attributes: [
-			"id",
-			"content"
-		],
+		attributes: ["id", "content"],
 		where: { writer_id: userId },
-		include: [{model: Post, attributes: ["id", "title", "thumbnail", "board_id"], required: false}]
+		include: [
+			{
+				model: Post,
+				attributes: ["id", "title", "thumbnail", "board_id"],
+				required: false,
+			},
+		],
 	});
 
 	return comment;
