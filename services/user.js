@@ -655,11 +655,37 @@ module.exports.editComment = async (commentId, formData) => {
 };
 
 // 댓글 삭제
-module.exports.removeComment = async (commentId) => {
-	let comment;
+module.exports.removeComment = async (userId, commentId) => {
+	let comment, user;
 
-	comment = await Comment.destroy({ where: { id: commentId } });
-	return comment;
+	//init
+	const init = () => {
+		Comment.findByPk(commentId).then((obj) => (comment = obj));
+		User.findByPk(userId).then((obj) => (user = obj));
+	};
+
+	//check
+	const check = async () => {
+		if (await user.hasComment(comment)) {
+			return true;
+		} else {
+			const err = NoPermissionError(
+				"해당 게시물을 삭제할 수 있는 관리자 계정이 아닙니다."
+			);
+			throw err;
+		}
+	};
+	//execute
+	const execute = async () => {
+		await comment.destroy();
+	};
+
+	await init();
+	await check();
+	await execute();
+
+	//after
+	return true;
 };
 
 // 내가 쓴 게시물 모두 불러오기
