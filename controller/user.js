@@ -1,9 +1,9 @@
 const UserService = require("../services/user");
 
 // 프로필 확인
-module.exports.getProfile = (res, req, next) => {
+module.exports.getProfile = async (res, req, next) => {
 	try {
-		const user = UserService.getProfile(req.user.id);
+		const user = await UserService.getProfile(req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -11,9 +11,9 @@ module.exports.getProfile = (res, req, next) => {
 };
 
 // 프로필 수정
-module.exports.editProfile = (res, req, next) => {
+module.exports.editProfile = async (res, req, next) => {
 	try {
-		const user = UserService.editProfile(req.user.id, req);
+		const user = await UserService.editProfile(req.user.id, req);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -21,9 +21,9 @@ module.exports.editProfile = (res, req, next) => {
 };
 
 // 일정 추가
-module.exports.addSchedule = (res, req, next) => {
+module.exports.addSchedule = async (res, req, next) => {
 	try {
-		const user = UserService.addSchedule(req, req.user.id);
+		const user = await UserService.addSchedule(req, req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -31,9 +31,9 @@ module.exports.addSchedule = (res, req, next) => {
 };
 
 // 일정 확인
-module.exports.getSchedule = (res, req, next) => {
+module.exports.getSchedule = async (res, req, next) => {
 	try {
-		const user = UserService.getSchedule(date, scheduleId);
+		const user = await UserService.getSchedule(date, scheduleId);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -41,9 +41,9 @@ module.exports.getSchedule = (res, req, next) => {
 };
 
 // 일정 수정
-module.exports.editSchedule = (res, req, next) => {
+module.exports.editSchedule = async (res, req, next) => {
 	try {
-		const user = UserService.editSchedule(scheduleId, req);
+		const user = await UserService.editSchedule(scheduleId, req);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -51,9 +51,9 @@ module.exports.editSchedule = (res, req, next) => {
 };
 
 // 일정 삭제
-module.exports.removeSchedule = (res, req, next) => {
+module.exports.removeSchedule = async (res, req, next) => {
 	try {
-		const user = UserService.removeSchedule(scheduleId);
+		const user = await UserService.removeSchedule(scheduleId);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -61,9 +61,9 @@ module.exports.removeSchedule = (res, req, next) => {
 };
 
 // 일정 모두 불러오기
-module.exports.getAllSchedule = (res, req, next) => {
+module.exports.getAllSchedule = async (res, req, next) => {
 	try {
-		const user = UserService.getAllSchedule(date, req.user.id);
+		const user = await UserService.getAllSchedule(date, req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -71,9 +71,9 @@ module.exports.getAllSchedule = (res, req, next) => {
 };
 
 // 내가 쓴 게시물 모두 불러오기
-module.exports.getAllUserPost = (res, req, next) => {
+module.exports.getAllUserPost = async (res, req, next) => {
 	try {
-		const user = UserService.getAllUserPost(req.user.id);
+		const user = await UserService.getAllUserPost(req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -81,9 +81,9 @@ module.exports.getAllUserPost = (res, req, next) => {
 };
 
 // 내가 쓴 댓글 모두 불러오기
-module.exports.getAllUserComment = (res, req, next) => {
+module.exports.getAllUserComment = async (res, req, next) => {
 	try {
-		const user = UserService.getAllUserComment(req.user.id);
+		const user = await UserService.getAllUserComment(req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
