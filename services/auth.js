@@ -189,7 +189,7 @@ module.exports.resetPW = async (token, newPassword) => {
 };
 
 // 회원 탈퇴
-module.exports.quit = (id) => {
+module.exports.quit = async (id) => {
 	const user = await User.destroy({ where: { id } });
 	return user;
 };

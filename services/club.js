@@ -272,7 +272,7 @@ module.exports.removeCommentInClub = async (userId, commentId) => {
 			throw err;
 		}
 	};
-	const execute = () => {
+	const execute = async () => {
 		await comment.destroy();
 	};
 	return true;

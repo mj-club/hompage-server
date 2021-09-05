@@ -19,7 +19,7 @@ module.exports.isUnionManager = async (userId) => {
 };
 
 // 계정 타입 확인 - 일반 학생 계정인지, 동아리 계정인지, 총동연 계정인지
-module.exports.checkAccountType = (userId, assume) => {
+module.exports.checkAccountType = async (userId, assume) => {
 	let user = await Manager.findByPk(userId);
 
 	let accountType;

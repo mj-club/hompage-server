@@ -54,267 +54,253 @@ module.exports.showPost = async (postId) => {
 
 // 모든 게시판에서 키워드로 검색하기
 module.exports.searchAll = async (keyword, searchOption, page) => {
-  let fetchCount = page;
-  let limit = 15;
-  let skip = 0;
-  let post;
-  if (fetchCount > 1) {
-    skip = limit * (fetchCount - 1);
-  }
+	let fetchCount = page;
+	let limit = 15;
+	let skip = 0;
+	let post;
+	if (fetchCount > 1) {
+		skip = limit * (fetchCount - 1);
+	}
 
-  // 제목으로 검색
-  if (searchOption == "title") {
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-        "board_id"
-      ],
-      where: {
-        title: {
-          [Op.like]: "%" + keyword + "%",
-        }
-      },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false },
-      { model: Board, attributes: ["name"], required: false },
-    ],
+	// 제목으로 검색
+	if (searchOption == "title") {
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content", "board_id"],
+			where: {
+				title: {
+					[Op.like]: "%" + keyword + "%",
+				},
+			},
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+			],
 
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
 
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  } 
-  // 제목 + 내용으로 검색
-  else if (searchOption == "both") {
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-      ],
-      where: {
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + keyword + "%",
-            },
-            content: {
-              [Op.like]: "%" + keyword + "%",
-            },
-          },
-        ]
-      },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false },
-      { model: Board, attributes: ["name"], required: false }],
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	// 제목 + 내용으로 검색
+	else if (searchOption == "both") {
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content"],
+			where: {
+				[Op.or]: [
+					{
+						title: {
+							[Op.like]: "%" + keyword + "%",
+						},
+						content: {
+							[Op.like]: "%" + keyword + "%",
+						},
+					},
+				],
+			},
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+			],
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
 
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  } 
-  // 작성자명으로 검색
-  else if (searchOption == "writer") {
-    const user = await User.findOne({
-      attributes: ["name"],
-      where: { name: keyword },
-    });
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-      ],
-      where: { id: user.id },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false },
-      { model: Board, attributes: ["name"], required: false }],
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	// 작성자명으로 검색
+	else if (searchOption == "writer") {
+		const user = await User.findOne({
+			attributes: ["name"],
+			where: { name: keyword },
+		});
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content"],
+			where: { id: user.id },
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+				{ model: Board, attributes: ["name"], required: false },
+			],
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
 
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  }
-  return post;
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	return post;
 };
 
 // 특정 게시판에서 키워드로 검색하기
-module.exports.searchByBoard = async (keyword, searchOption, page, boardName, clubName, unionName) => {
-  let fetchCount = page;
-  let limit = 15;
-  let skip = 0;
-  let post;
-  let clubId = null;
-  if (fetchCount > 1) {
-    skip = limit * (fetchCount - 1);
-  }
+module.exports.searchByBoard = async (
+	keyword,
+	searchOption,
+	page,
+	boardName,
+	clubName,
+	unionName
+) => {
+	let fetchCount = page;
+	let limit = 15;
+	let skip = 0;
+	let post;
+	let clubId = null;
+	if (fetchCount > 1) {
+		skip = limit * (fetchCount - 1);
+	}
 
-  // 게시판 탐색 및 게시판 id
-  const board;
-  if (unionName != null) {
-    const union = await UnionInfo.findOne({
-      where: { name: unionName }
-    });
+	// 게시판 탐색 및 게시판 id
+	let board;
+	if (unionName != null) {
+		const union = await UnionInfo.findOne({
+			where: { name: unionName },
+		});
 
-    if (!union) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
+		if (!union) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
 
-    board = await Board.findOne({
-      where: { name: boardName, union_id: union.id }
-    });
+		board = await Board.findOne({
+			where: { name: boardName, union_id: union.id },
+		});
 
-    if (!board) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  }
-  else if (clubName != null) {
-    const club = await Club.findOne({
-      where: { name: clubName }
-    });
+		if (!board) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	} else if (clubName != null) {
+		const club = await Club.findOne({
+			where: { name: clubName },
+		});
 
-    if (!club) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
+		if (!club) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
 
-    board = await Board.findOne({
-      where: { name: boardName, club_id: club.id }
-    });
+		board = await Board.findOne({
+			where: { name: boardName, club_id: club.id },
+		});
 
-    if (!board) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  }
-  const boardID = board.id;
+		if (!board) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	const boardID = board.id;
 
-  // 제목으로 검색
-  if (searchOption == "title") {
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-      ],
-      where: {
-        title: {
-          [Op.like]: "%" + keyword + "%",
-        },
-        board_id: boardID
-      },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false }],
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
+	// 제목으로 검색
+	if (searchOption == "title") {
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content"],
+			where: {
+				title: {
+					[Op.like]: "%" + keyword + "%",
+				},
+				board_id: boardID,
+			},
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+			],
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
 
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  } 
-  // 제목 + 내용으로 검색
-  else if (searchOption == "both") {
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-      ],
-      where: {
-        [Op.or]: [
-          {
-            title: {
-              [Op.like]: "%" + keyword + "%",
-            },
-            content: {
-              [Op.like]: "%" + keyword + "%",
-            },
-          },
-        ],
-        board_id: boardID
-      },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false }],
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
-    
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  } 
-  // 작성자명으로 검색
-  else if (searchOption == "writer") {
-    const user = await User.findOne({
-      attributes: ["name"],
-      where: { name: keyword },
-    });
-    post = await Post.findAll({
-      attributes: [
-        "id",
-        "title",
-        "thumbnail",
-        "content",
-      ],
-      where: { id: user.id, board_id: boardID },
-      include: [{ model: Club, attributes: ["name"], required: false },
-      { model: UnionInfo, attributes: ["name"], required: false }],
-      order: [["created_at", "DESC"]],
-      offset: skip,
-      limit: limit,
-    });
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	// 제목 + 내용으로 검색
+	else if (searchOption == "both") {
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content"],
+			where: {
+				[Op.or]: [
+					{
+						title: {
+							[Op.like]: "%" + keyword + "%",
+						},
+						content: {
+							[Op.like]: "%" + keyword + "%",
+						},
+					},
+				],
+				board_id: boardID,
+			},
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+			],
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
 
-    if (!post) {
-      const err = new Error();
-      err.message = "db에 관련 정보가 없습니다.";
-      err.status = 500;
-      throw err;
-    }
-  }
-  return post;
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	// 작성자명으로 검색
+	else if (searchOption == "writer") {
+		const user = await User.findOne({
+			attributes: ["name"],
+			where: { name: keyword },
+		});
+		post = await Post.findAll({
+			attributes: ["id", "title", "thumbnail", "content"],
+			where: { id: user.id, board_id: boardID },
+			include: [
+				{ model: Club, attributes: ["name"], required: false },
+				{ model: UnionInfo, attributes: ["name"], required: false },
+			],
+			order: [["created_at", "DESC"]],
+			offset: skip,
+			limit: limit,
+		});
+
+		if (!post) {
+			const err = new Error();
+			err.message = "db에 관련 정보가 없습니다.";
+			err.status = 500;
+			throw err;
+		}
+	}
+	return post;
 };
