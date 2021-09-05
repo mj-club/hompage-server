@@ -1,5 +1,5 @@
 const { Club, ClubInfo, Member, Manager, Post, Comment } = require("../models");
-const { NoPermissionError } = require("../utils/handleError");
+const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
 module.exports.getClubInfo = async (formData) => {
@@ -9,10 +9,9 @@ module.exports.getClubInfo = async (formData) => {
 		where: { name: formData.clubName },
 	});
 
+	// 동아리 정보가 존재하지 않을 경우
 	if (!clubId) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
 		throw err;
 	}
 
@@ -22,9 +21,7 @@ module.exports.getClubInfo = async (formData) => {
 	});
 
 	if (!club) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리 정보입니다.");
 		throw err;
 	}
 
@@ -40,9 +37,7 @@ module.exports.editClubInfo = async (formData) => {
 	});
 
 	if (!clubId) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
 		throw err;
 	}
 
@@ -52,9 +47,7 @@ module.exports.editClubInfo = async (formData) => {
 	});
 
 	if (!club) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리 정보입니다.");
 		throw err;
 	}
 
@@ -80,9 +73,7 @@ module.exports.addMember = async (clubName, formData) => {
 	});
 
 	if (!clubId) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
 		throw err;
 	}
 
@@ -92,9 +83,7 @@ module.exports.addMember = async (clubName, formData) => {
 	});
 
 	if (!club) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리 정보입니다.");
 		throw err;
 	}
 
@@ -116,9 +105,7 @@ module.exports.removeMember = async (clubName, userId) => {
 	});
 
 	if (!clubId) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
 		throw err;
 	}
 
@@ -128,9 +115,7 @@ module.exports.removeMember = async (clubName, userId) => {
 	});
 
 	if (!member) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리원입니다.");
 		throw err;
 	}
 
@@ -148,9 +133,7 @@ module.exports.getAllMember = async (clubName) => {
 	});
 
 	if (!club) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
 		throw err;
 	}
 
@@ -158,9 +141,7 @@ module.exports.getAllMember = async (clubName) => {
 	const members = club.getMembers();
 
 	if (!members) {
-		const err = new Error();
-		err.message = "db에 관련 정보가 없습니다.";
-		err.status = 500;
+		const err = NoSuchDataError("존재하지 않는 동아리원입니다.");
 		throw err;
 	}
 
