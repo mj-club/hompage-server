@@ -1,9 +1,9 @@
 const UnionService = require("../services/union");
 
 // 총동연 정보 추가
-module.exports.addUnionInfo = (res, req, next) => {
+module.exports.addUnionInfo = async (res, req, next) => {
   try {
-		const union = UnionService.addUnionInfo(req);
+		const union = await UnionService.addUnionInfo(req);
 		res.json(union);
 	} catch (err) {
 		next(err);
@@ -11,9 +11,9 @@ module.exports.addUnionInfo = (res, req, next) => {
 };
 
 // 총동연 정보 확인
-module.exports.getUnionInfo = (res, req, next) => {
+module.exports.getUnionInfo = async (res, req, next) => {
   try {
-		const union = UnionService.getUnionInfo(unionName);
+		const union = await UnionService.getUnionInfo(unionName);
 		res.json(union);
 	} catch (err) {
 		next(err);
@@ -21,9 +21,9 @@ module.exports.getUnionInfo = (res, req, next) => {
 };
 
 // 총동연 정보 수정
-module.exports.editUnionInfo = (res, req, next) => {
+module.exports.editUnionInfo = async (res, req, next) => {
   try {
-		const union = UnionService.editUnionInfo(unionName);
+		const union = await UnionService.editUnionInfo(unionName);
 		res.json(union);
 	} catch (err) {
 		next(err);
@@ -31,9 +31,9 @@ module.exports.editUnionInfo = (res, req, next) => {
 };
 
 // 총동연 정보 삭제
-module.exports.removeUnionInfo = (res, req, next) => {
+module.exports.removeUnionInfo = async (res, req, next) => {
   try {
-		const union = UnionService.removeUnionInfo(unionName);
+		const union = await UnionService.removeUnionInfo(unionName);
 		res.json(union);
 	} catch (err) {
 		next(err);
@@ -41,9 +41,9 @@ module.exports.removeUnionInfo = (res, req, next) => {
 };
 
 // 동아리 추가
-module.exports.addClub = (res, req, next) => {
+module.exports.addClub = async (res, req, next) => {
   try {
-		const union = UnionService.addClub(formData);
+		const union = await UnionService.addClub(formData);
 		res.json(union);
 	} catch (err) {
 		next(err);
@@ -51,9 +51,9 @@ module.exports.addClub = (res, req, next) => {
 };
 
 // 동아리 삭제
-module.exports.removeClub = (res, req, next) => {
+module.exports.removeClub = async (res, req, next) => {
   try {
-		const union = UnionService.removeClub(clubName);
+		const union = await UnionService.removeClub(clubName);
 		res.json(union);
 	} catch (err) {
 		next(err);
