@@ -54,6 +54,7 @@ module.exports = {
 		let clubDatas = [];
 		let boardDatas = [];
 		let managerDatas = [];
+		let clubInfoDatas = [];
 
 		await Promise.all(
 			clubSets.map(async (club) => {
@@ -92,7 +93,7 @@ module.exports = {
 			})
 		);
 
-		queryInterface.bulkInsert("club_auth", clubAuthDatas);
+		await queryInterface.bulkInsert("club_auth", clubAuthDatas);
 		await queryInterface.bulkInsert("users", userDatas);
 
 		let clubUsers = await queryInterface.sequelize.query(
@@ -111,10 +112,11 @@ module.exports = {
 				// .replace(/T/, " ")
 				// .replace(/\..+/, ""),
 			};
+
 			clubDatas.push(clubObj);
 		});
 		await queryInterface.bulkInsert("clubs", clubDatas);
-		queryInterface.bulkInsert("union", [
+		await queryInterface.bulkInsert("union", [
 			{
 				name: "총동아리연합회",
 				// introduction: "안녕하세요, 총동아리연합회입니다.",
@@ -141,6 +143,21 @@ module.exports = {
 				updated_at: new Date(),
 			};
 			managerDatas.push(managerObj);
+
+			// 임시
+			let clubInfoObj = {
+				club_id: club.id,
+				short_introduce: "짧은 소개",
+				long_introduce: "긴 소개 글",
+				recruit: "모집안내",
+				meeting: "정기 모임",
+				contact: "연락처",
+				location: "동아리 위치",
+				department: "분과명",
+				created_at: new Date(),
+				updated_at: new Date(),
+			};
+			clubInfoDatas.push(clubInfoObj); //임시
 		});
 		let unionPassword = await bcrypt.hash(process.env.MAILER_PW, 12);
 		let unionUser = {
@@ -181,8 +198,9 @@ module.exports = {
 		managerDatas.push(managerObj);
 
 		console.log("done");
-		queryInterface.bulkInsert("board", boardDatas);
-		queryInterface.bulkInsert("managers", managerDatas);
+		await queryInterface.bulkInsert("board", boardDatas);
+		await queryInterface.bulkInsert("managers", managerDatas);
+		await queryInterface.bulkInsert("club_info", clubInfoDatas);
 	},
 
 	down: async (queryInterface, Sequelize) => {
@@ -192,10 +210,11 @@ module.exports = {
 		 * Example:
 		 * await queryInterface.bulkDelete('People', null, {});
 		 */
-		queryInterface.bulkDelete("users", null, {});
-		queryInterface.bulkDelete("clubs", null, {});
-		queryInterface.bulkDelete("club_auth", null, {});
-		queryInterface.bulkDelete("board", null, {});
-		queryInterface.bulkDelete("managers", null, {});
+		await queryInterface.bulkDelete("users", null, {});
+		await queryInterface.bulkDelete("clubs", null, {});
+		await queryInterface.bulkDelete("club_auth", null, {});
+		await queryInterface.bulkDelete("board", null, {});
+		await queryInterface.bulkDelete("managers", null, {});
+		await queryInterface.bulkDelete("club_info", null, {});
 	},
 };
