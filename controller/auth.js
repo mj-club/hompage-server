@@ -1,7 +1,7 @@
 const { AuthService } = require("../services");
 
 // 회원가입
-module.exports.join = (res, req, next) => {
+module.exports.join = async (res, req, next) => {
 	try {
 		const user = await AuthService.join(req.body);
 		res.json(user);
@@ -39,7 +39,7 @@ module.exports.logout = (req, res) => {
 };
 
 // 이메일 찾기
-module.exports.findEmail = (res, req, next) => {
+module.exports.findEmail = async (res, req, next) => {
 	try {
 		const email = await AuthService.findEmail(req.body);
 		res.json(email);
@@ -49,7 +49,7 @@ module.exports.findEmail = (res, req, next) => {
 };
 
 // 토큰 요청
-module.exports.sendTokenToMail = (res, req, next) => {
+module.exports.sendTokenToMail = async (res, req, next) => {
 	try {
 		await AuthService.sendTokenToMail(req.body);
 		res.json(true);
@@ -59,7 +59,7 @@ module.exports.sendTokenToMail = (res, req, next) => {
 };
 
 // 비번 재설정
-module.exports.resetPW = (res, req, next) => {
+module.exports.resetPW = async (res, req, next) => {
 	try {
 		const result = await AuthService.resetPW(
 			req.params.token,
@@ -72,7 +72,7 @@ module.exports.resetPW = (res, req, next) => {
 };
 
 // 회원 탈퇴
-module.exports.leave = (res, req, next) => {
+module.exports.leave = async (res, req, next) => {
 	try {
 		const result = await AuthService.quit(req.user.id);
 		res.json(result);
@@ -85,7 +85,7 @@ module.exports.leave = (res, req, next) => {
 module.exports.checkPermission = (res, req, next) => {};
 
 // 이메일 중복확인
-module.exports.checkEmail = (res, req, next) => {
+module.exports.checkEmail = async (res, req, next) => {
 	try {
 		const result = await AuthService.checkDuplication("email", req.body.email);
 		res.json(result);
@@ -95,7 +95,7 @@ module.exports.checkEmail = (res, req, next) => {
 };
 
 // 학번 중복확인
-module.exports.checkStudentId = (res, req, next) => {
+module.exports.checkStudentId = async (res, req, next) => {
 	try {
 		const result = await AuthService.checkDuplication(
 			"student_id",
@@ -108,7 +108,7 @@ module.exports.checkStudentId = (res, req, next) => {
 };
 
 // 휴대폰번호 중복확인
-module.exports.checkPh = (res, req, next) => {
+module.exports.checkPh = async (res, req, next) => {
 	try {
 		const result = await AuthService.checkDuplication(
 			"ph_number",

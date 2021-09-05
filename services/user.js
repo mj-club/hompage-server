@@ -160,7 +160,7 @@ module.exports.editSchedule = async (scheduleId, formData) => {
 		throw err;
 	}
 
-	const schedule = await Schedule.update({
+	schedule = await Schedule.update({
 		title,
 		description,
 		start,
@@ -539,7 +539,7 @@ module.exports.addPetitionPost = async (userId, formData) => {
 };
 
 // 게시물 수정하기
-module.exports.editPost = (postId, formData) => {
+module.exports.editPost = async (postId, formData) => {
 	let { title, thumbnail, content, set_top, files } = formData;
 	let post;
 
@@ -548,7 +548,7 @@ module.exports.editPost = (postId, formData) => {
 		post = await Post.findByPk(postId);
 	};
 	//execute
-	const execute = () => {
+	const execute = async () => {
 		post.update({
 			title,
 			thumbnail,
@@ -646,7 +646,7 @@ module.exports.editComment = async (commentId, formData) => {
 	let { content } = formData;
 	let comment;
 	// init
-	let comment = await Comment.findByPk(commentId);
+	comment = await Comment.findByPk(commentId);
 
 	// create
 	comment = await comment.update({ content });

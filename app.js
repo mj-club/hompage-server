@@ -23,18 +23,14 @@ const redisClient = redis.createClient({
 });
 
 // set router
-// const indexRouter = require("./routes/index");
-// const usersRouter = require("./routes/users");
-// const authRouter = require("./routes/auth");
-// const unionRouter = require("./routes/union");
-// const clubRouter = require("./routes/club");
-// const postRouter = require("./routes/post");
-// const scheduleRouter = require("./routes/schedule");
-// const eventRouter = require("./routes/event");
-// const commentRouter = require("./routes/comment");
-// const fileRouter = require("./routes/file");
-// const rentalRouter = require("./routes/rental");
-// const searchRouter = require("./routes/search");
+const indexRouter = require("./routes/index");
+const authRouter = require("./routes/auth");
+const clubRouter = require("./routes/club");
+const commentRouter = require("./routes/comment");
+const postRouter = require("./routes/post");
+const searchRouter = require("./routes/search");
+const unionRouter = require("./routes/union");
+const userRouter = require("./routes/user");
 const { sequelize } = require("./models");
 const passportConfig = require("./passport");
 const logger = require("./logger");
@@ -101,18 +97,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // route handler
-// app.use("/", indexRouter);
-// app.use("/users", usersRouter);
-// app.use("/auth", authRouter);
-// app.use("/union", unionRouter);
-// app.use("/club", clubRouter);
-// app.use("/post", postRouter);
-// app.use("/comment", commentRouter);
-// app.use("/schedule", scheduleRouter);
-// app.use("/event", eventRouter);
-// app.use("/file", fileRouter);
-// app.use("/rental", rentalRouter);
-// app.use("/search", searchRouter);
+app.use("/", indexRouter);
+app.use("/auth", authRouter);
+app.use("/club", clubRouter);
+app.use("/comment", commentRouter);
+app.use("/post", postRouter);
+app.use("/search", searchRouter);
+app.use("/union", unionRouter);
+app.use("/user", userRouter);
 
 // react router
 app.get("*", (req, res) => {
@@ -149,13 +141,12 @@ app.listen(app.get("port"), () => {
 	);
 });
 
-
 // 테스트 전용
 module.exports = {
-  sayHello: function () {
-    return 'hello';
-  },
-  addNumbers: function (a, b) {
-    return a + b;
-  }
+	sayHello: function () {
+		return "hello";
+	},
+	addNumbers: function (a, b) {
+		return a + b;
+	},
 };

@@ -1,9 +1,9 @@
 const { UserService, ClubService, UnionService } = require("../services");
 
 // 댓글 등록
-module.exports.addComment = (res, req, next) => {
+module.exports.addComment = async (res, req, next) => {
 	try {
-		const comment = UserService.addComment(
+		const comment = await UserService.addComment(
 			req.user.id,
 			req.params.postId,
 			req.body
@@ -15,9 +15,12 @@ module.exports.addComment = (res, req, next) => {
 };
 
 // 댓글 수정하기
-module.exports.editComment = (res, req, next) => {
+module.exports.editComment = async (res, req, next) => {
 	try {
-		const comment = UserService.editComment(req.params.commentId, req.body);
+		const comment = await UserService.editComment(
+			req.params.commentId,
+			req.body
+		);
 		res.json(comment);
 	} catch (err) {
 		next(err);
@@ -25,21 +28,21 @@ module.exports.editComment = (res, req, next) => {
 };
 
 // 댓글 삭제하기
-module.exports.removeComment = (res, req, next) => {
+module.exports.removeComment = async (res, req, next) => {
 	let comment;
 	try {
-		comment = UserService.removeComment(req.params.commentId);
+		comment = await UserService.removeComment(req.params.commentId);
 		return comment;
 	} catch (err) {
 		if (err.name === "NoPermissionError") {
 			try {
 				if (Permission.isClubManager(req.user.id)) {
-					comment = ClubService.removeCommentInClub(
+					comment = await ClubService.removeCommentInClub(
 						req.user.id,
 						req.params.commentId
 					);
 				} else {
-					comment = UnionService.removeOtherComment(req.params.commentId);
+					comment = await UnionService.removeOtherComment(req.params.commentId);
 				}
 				return comment;
 			} catch (error) {

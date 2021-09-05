@@ -1,4 +1,3 @@
-const { json } = require("sequelize/types");
 const { Union, UnionInfo, Post, EventInfo } = require("../models");
 
 // 총동연 정보 추가하기
