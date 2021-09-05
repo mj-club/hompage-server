@@ -162,12 +162,14 @@ module.exports = {
 		let eventBoard = createBoardObj("event", 1, false);
 		let monthlyKeyumBoard = createBoardObj("monthlyKeyum", 1, false);
 		let petitionBoard = createBoardObj("petition", 1, false);
+		let freeBoard = createBoardObj("free", 1, false);
 		boardDatas.push(
 			announcementBoard,
 			questionBoard,
 			eventBoard,
 			monthlyKeyumBoard,
-			petitionBoard
+			petitionBoard,
+			freeBoard
 		);
 
 		let managerObj = {
@@ -190,6 +192,10 @@ module.exports = {
 		 * Example:
 		 * await queryInterface.bulkDelete('People', null, {});
 		 */
-		return queryInterface.bulkDelete("users", null, {});
+		queryInterface.bulkDelete("users", null, {});
+		queryInterface.bulkDelete("clubs", null, {});
+		queryInterface.bulkDelete("club_auth", null, {});
+		queryInterface.bulkDelete("board", null, {});
+		queryInterface.bulkDelete("managers", null, {});
 	},
 };
