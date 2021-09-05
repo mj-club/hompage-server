@@ -7,7 +7,7 @@ module.exports.ExistUserError = (errorMessage) => {
 };
 
 module.exports.NoSuchDataError = (errorMessage) => {
-	const err = new 
+	const err = new Error();
 	err.name = "NoSuchDataError";
 	err.message = errorMessage;
 	err.status = 404;
@@ -15,7 +15,7 @@ module.exports.NoSuchDataError = (errorMessage) => {
 };
 
 module.exports.NoPermissionError = (errorMessage) => {
-	const err = new 
+	const err = new Error();
 	err.name = "NoPermissionError";
 	err.message = errorMessage;
 	err.status = 403;
