@@ -8,10 +8,10 @@ const { addSchedule, getSchedule } = require("../services/user");
 router
 	.route("/info")
 	.get(UserController.getProfile)
-	.patch(UserController.editProfile);
+	.patch(multer().none(), UserController.editProfile);
 
 /* 일정 추가 */
-router.post("/schedule", addSchedule);
+router.post("/schedule", multer().none(), addSchedule);
 
 /* 일정 모두 불러오기 */
 router.get("/schedule/all", getSchedule);
@@ -20,7 +20,7 @@ router.get("/schedule/all", getSchedule);
 router
 	.route("/schedule/:scheduleId")
 	.get(UserController.addSchedule)
-	.patch(UserController.editSchedule)
+	.patch(multer().none(), UserController.editSchedule)
 	.delete(UserController.removeSchedule);
 
 /* 내가 쓴 게시물 모두 불러오기 */
