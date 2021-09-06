@@ -24,7 +24,7 @@ module.exports.editClubInfo = async (res, req, next) => {
 // 멤버 추가
 module.exports.addMember = async (res, req, next) => {
 	try {
-		const club;
+		const club = "";
 		const clubId = await isClubManager(req.user.id);
 		if (typeof clubId == "number") {
 			club = await ClubService.addMember(clubId, req.body);
@@ -42,7 +42,7 @@ module.exports.addMember = async (res, req, next) => {
 // 멤버 삭제
 module.exports.removeMember = async (res, req, next) => {
 	try {
-		const club;
+		const club = "";
 		const clubId = await isClubManager(req.user.id);
 		if (typeof clubId == "number") {
 			club = await ClubService.removeMember(clubId, req.body);
@@ -60,7 +60,7 @@ module.exports.removeMember = async (res, req, next) => {
 // 모든 멤버 확인
 module.exports.getAllMember = async (res, req, next) => {
 	try {
-		const club;
+		const club = "";
 		const clubId = await isClubManager(req.user.id);
 		if (typeof clubId == "number") {
 			club = await ClubService.getAllMember(clubId);
