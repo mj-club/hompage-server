@@ -101,8 +101,7 @@ module.exports.addSchedule = async (formData, userId) => {
 		description,
 		start,
 		end,
-		all_day_long,
-		provider,
+		all_day_long
 	});
 
 	// 계정 타입확인
@@ -144,7 +143,7 @@ module.exports.addSchedule = async (formData, userId) => {
 
 // 일정 수정하기
 module.exports.editSchedule = async (scheduleId, formData) => {
-	const { title, description, start, end, all_day_long, provider } = formData;
+	const { title, description, start, end, all_day_long} = formData;
 	const schedule = await Schedule.findOne({
 		where: { id: scheduleId },
 	});
@@ -161,8 +160,7 @@ module.exports.editSchedule = async (scheduleId, formData) => {
 		description,
 		start,
 		end,
-		all_day_long,
-		provider,
+		all_day_long
 	});
 
 	return schedule;
