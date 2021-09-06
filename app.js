@@ -37,7 +37,7 @@ const logger = require("./logger");
 
 // init express app
 const app = express();
-// passportConfig();
+passportConfig();
 app.set("port", process.env.PORT || 3001);
 
 // init sequelize

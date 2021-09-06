@@ -7,7 +7,7 @@ const {
 const { Permission } = require("../utils");
 
 // 게시물 등록
-module.exports.addPost = async (res, req, next) => {
+module.exports.addPost = async (req, res, next) => {
 	try {
 		const { belong, board } = req.params;
 		let post;
@@ -61,7 +61,7 @@ module.exports.addPost = async (res, req, next) => {
 };
 
 // 게시물 보여주기
-module.exports.showPost = async (res, req, next) => {
+module.exports.showPost = async (req, res, next) => {
 	try {
 		const post = await PageService.showPost(req.params.postId);
 		return post;
@@ -71,7 +71,7 @@ module.exports.showPost = async (res, req, next) => {
 };
 
 // 게시물 수정하기
-module.exports.editPost = async (res, req, next) => {
+module.exports.editPost = async (req, res, next) => {
 	try {
 		const post = await UserService.editPost(req.params.postId, req.body);
 		return post;
@@ -81,7 +81,7 @@ module.exports.editPost = async (res, req, next) => {
 };
 
 // 게시물 삭제하기
-module.exports.removePost = async (res, req, next) => {
+module.exports.removePost = async (req, res, next) => {
 	let post;
 	try {
 		post = await UserService.removePost(req.user.id, req.params.postId);

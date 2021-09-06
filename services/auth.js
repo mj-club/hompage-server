@@ -37,17 +37,18 @@ const checkDuplication = (key, value) => {
 
 // 가입된 정보인지 확인
 const checkExistUser = (email, ph_number, student_id = undefined) => {
+	let state = false;
 	// 이메일 확인
-	checkDuplication("email", email);
+	state = checkDuplication("email", email);
 
 	// 전화번호 확인
-	checkDuplication("ph_number", ph_number);
+	state = checkDuplication("ph_number", ph_number);
 
 	// 학번 확인
 	if (student_id) {
-		checkDuplication("student_id", student_id);
+		state = checkDuplication("student_id", student_id);
 	}
-	return undefined;
+	return state;
 };
 
 // module.exports
@@ -56,22 +57,19 @@ module.exports.join = async (formData) => {
 	let exUser;
 
 	// 중복 가입 확인
-	const err = await checkExistUser(
+	await checkExistUser(
 		formData.email,
 		formData.ph_number,
 		formData.student_id ? formData.student_id : undefined
 	);
-	if (err) {
-		throw err;
-	}
-
 	const hash = await bcrypt.hash(formData.password, 12);
-	const user = await User.create({
+	let user = await User.create({
 		email: formData.email,
 		name: formData.name,
 		password: hash,
 		ph_number: formData.ph_number,
 	});
+	// console.log(user);
 	if (formData.student_id) {
 		const studentInfo = await StudentInfo.create({
 			department: formData.department,
@@ -79,8 +77,10 @@ module.exports.join = async (formData) => {
 			school_year: formData.school_year,
 			student_id: formData.student_id,
 		});
-		user = user.addStudentInfo(studentInfo);
+		// console.log(studentInfo);
+		user = await user.setStudentInfo(studentInfo);
 	}
+	console.log(user);
 	return user;
 };
 
