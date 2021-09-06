@@ -3,6 +3,7 @@ var router = express.Router();
 
 const UserController = require("../controller/user");
 const { addSchedule, getSchedule } = require("../services/user");
+var multer = require("multer");
 
 /* 프로필 확인, 수정 */
 router
