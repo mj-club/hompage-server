@@ -108,18 +108,21 @@ module.exports.removeMember = async (clubId, formData) => {
 module.exports.getAllMember = async (clubId) => {
 	console.log(clubId);
 	// 동아리 존재 여부 확인
-	const club = await Club.findOne({
-		where: { id: clubId },
-	});
-	console.log(club);
+	// const club = await Club.findOne({
+	// 	where: { id: clubId },
+	// });
+	// console.log(club);
 
-	if (!club) {
-		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
-		throw err;
-	}
+	// if (!club) {
+	// 	const err = NoSuchDataError("존재하지 않는 동아리입니다.");
+	// 	throw err;
+	// }
 
 	// 동아리원 불러오기
-	const members = await club.getMembers();
+	// const members = await club.getMembers();
+	const members = await Member.findAll({
+		where: { club_id: clubId }
+	});
 	console.log(members);
 
 	if (!members) {
