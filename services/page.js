@@ -53,8 +53,10 @@ module.exports.showPost = async (postId) => {
 };
 
 // 모든 게시판에서 키워드로 검색하기
-module.exports.searchAll = async (keyword, searchOption, page) => {
-	let fetchCount = page;
+module.exports.searchAll = async (formData) => {
+	let fetchCount = formData.page;
+	let keyword = formData.keyword;
+	let searchOption = formData.searchOption;
 	let limit = 15;
 	let skip = 0;
 	let post;
@@ -153,14 +155,14 @@ module.exports.searchAll = async (keyword, searchOption, page) => {
 
 // 특정 게시판에서 키워드로 검색하기
 module.exports.searchByBoard = async (
-	keyword,
-	searchOption,
-	page,
-	boardName,
-	clubName,
-	unionName
+	formData
 ) => {
 	let fetchCount = page;
+	let keyword = formData.keyword;
+	let searchOption = formData.searchOption;
+	let boardName = formData.boardName;
+	let clubName = formData.clubName;
+	let unionName = formData.unionName;
 	let limit = 15;
 	let skip = 0;
 	let post;
