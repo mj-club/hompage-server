@@ -157,7 +157,7 @@ module.exports.searchAll = async (formData) => {
 module.exports.searchByBoard = async (
 	formData
 ) => {
-	let fetchCount = page;
+	let fetchCount = formData.page;
 	let keyword = formData.keyword;
 	let searchOption = formData.searchOption;
 	let boardName = formData.boardName;
