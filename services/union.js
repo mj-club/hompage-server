@@ -1,4 +1,4 @@
-const { Union, UnionInfo, Post, EventInfo } = require("../models");
+const { Union, UnionInfo, Post, EventInfo, ClubInfo } = require("../models");
 
 // 총동연 정보 추가하기
 module.exports.addUnionInfo = async (formData) => {
@@ -110,7 +110,7 @@ module.exports.addClub = async (formData) => {
 	}
 
 	// 추가
-	const addClub = await Club.create({
+	const clubInfo = await ClubInfo.create({
 		short_introduce: formData.short_introduce,
 		long_introduce: formData.long_introduce,
 		recruit: formData.recruit,
@@ -119,6 +119,12 @@ module.exports.addClub = async (formData) => {
 		location: formData.location,
 		department: formData.department,
 	});
+
+	const club = await Club.create({
+		name: formData.name
+	});
+
+	await clubInfo.addClub(club)
 	return addClub;
 };
 
@@ -136,8 +142,20 @@ module.exports.removeClub = async (clubId) => {
 		throw err;
 	}
 
+	const clubInfo = await ClubInfo.findOne({
+		where: { id: clubId },
+	});
+
+	if (!club) {
+		const err = new Error();
+		err.message = "db에 관련 정보가 없습니다.";
+		err.status = 500;
+		throw err;
+	}
+
 	// 삭제
 	const delClub = await club.destroy();
+	await clubInfo.destroy();
 	return delClub;
 };
 

@@ -49,9 +49,7 @@ module.exports.editProfile = async (userId, formData) => {
 	const {
 		email,
 		name,
-		password,
 		ph_number,
-		provider,
 		department,
 		major,
 		school_year,
@@ -82,9 +80,7 @@ module.exports.editProfile = async (userId, formData) => {
 	const updateUser = await user.update({
 		email,
 		name,
-		password,
 		ph_number,
-		provider,
 	});
 
 	const updateStudentInfo = await student.update({
