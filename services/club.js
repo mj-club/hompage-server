@@ -1,4 +1,4 @@
-const { Club, ClubInfo, Member, Manager, Post, Comment } = require("../models");
+const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo } = require("../models");
 const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
@@ -66,52 +66,47 @@ module.exports.editClubInfo = async (formData) => {
 
 // 동아리원 추가
 module.exports.addMember = async (clubId, formData) => {
-	// 동아리 존재 여부 확인
-	// const clubId = await Club.findOne({
-	// 	attributes: ["id"],
-	// 	where: { name: clubName },
-	// });
 
-	// if (!clubId) {
-	// 	const err = NoSuchDataError("존재하지 않는 동아리입니다.");
-	// 	throw err;
-	// }
+	// 동아리원 추가
+	const userInfo = await StudentInfo.findOne({
+		where: { student_id: formData.studentId }
+	})
 
-	// 동아리 정보 불러오기
-	const club = await ClubInfo.findOne({
-		where: { id: clubId },
-	});
-
-	if (!club) {
-		const err = NoSuchDataError("존재하지 않는 동아리 정보입니다.");
+	if (!userInfo) {
+		const err = NoSuchDataError("존재하지 않는 계정 정보입니다.");
 		throw err;
 	}
 
-	// 동아리원 추가
-	const member = await Member.create({
-		position: formData.position,
+	const user = await User.findOne({
+		where: { id: userInfo.id}
 	});
-	club.addMember(member);
 
-	return member;
+	if (!user) {
+		const err = NoSuchDataError("존재하지 않는 계정 정보입니다.");
+		throw err;
+	}
+
+	const club = await Club.findOne({
+    where: { id: clubId }
+  });
+
+  await club.addUser(user, {
+    through: { position: formData.position },
+  });
+  club = await Club.findOne({
+    where: { id: clubId },
+    include: User,
+  });
+
+	return club;
 };
 
 // 동아리원 삭제
-module.exports.removeMember = async (clubId, userId) => {
-	// // 동아리 존재 여부 확인
-	// const clubId = await Club.findOne({
-	// 	attributes: ["id"],
-	// 	where: { name: clubName },
-	// });
-
-	// if (!clubId) {
-	// 	const err = NoSuchDataError("존재하지 않는 동아리입니다.");
-	// 	throw err;
-	// }
+module.exports.removeMember = async (clubId, formData) => {
 
 	// 동아리원 존재 여부 확인
 	const member = await Member.findOne({
-		where: { users_id: userId, club_id: clubId },
+		where: { users_id: formData.userId, club_id: clubId },
 	});
 
 	if (!member) {
