@@ -120,12 +120,12 @@ module.exports.addClub = async (formData) => {
 		department: formData.department,
 	});
 
-	const club = await Club.create({
+	club = await Club.create({
 		name: formData.name
 	});
 
 	await clubInfo.addClub(club)
-	return addClub;
+	return club;
 };
 
 // 동아리 삭제
