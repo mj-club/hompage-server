@@ -33,6 +33,6 @@ router.post("/checkEmail", AuthController.checkEmail);
 router.post("/checkStudentId", AuthController.checkStudentId);
 
 /* 휴대폰번호 중복확인 */
-router.post("/ccheckPh", AuthController.checkPh);
+router.post("/checkPh", AuthController.checkPh);
 
 module.exports = router;
