@@ -28,11 +28,11 @@ module.exports.addUnionInfo = async (formData) => {
 };
 
 // 총동연 정보 불러오기
-module.exports.getUnionInfo = async (unionName) => {
+module.exports.getUnionInfo = async (unionId) => {
 	// 총동아리연합회 정보 불러오기
 	const union = await Union.findByPk(1, {
 		include: {
-			include: [{ model: UnionInfo, where: { name: unionName } }],
+			include: [{ model: UnionInfo, where: { id: unionId } }],
 		},
 	});
 
@@ -47,10 +47,10 @@ module.exports.getUnionInfo = async (unionName) => {
 };
 
 // 총동연 정보 수정하기
-module.exports.editUnionInfo = async (unionName) => {
+module.exports.editUnionInfo = async (unionId) => {
 	// n대 총동연 존재여부 탐색
 	const unionInfo = await UnionInfo.findOne({
-		where: { name: unionName },
+		where: { id: unionId },
 	});
 
 	if (!unionInfo) {
@@ -76,10 +76,10 @@ module.exports.editUnionInfo = async (unionName) => {
 };
 
 // 총동연 정보 삭제하기
-module.exports.removeUnionInfo = async (unionName) => {
+module.exports.removeUnionInfo = async (unionId) => {
 	// n대 총동연 존재여부 탐색
 	const unionInfo = await UnionInfo.findOne({
-		where: { name: unionName },
+		where: { id: unionId },
 	});
 
 	if (!unionInfo) {
@@ -123,10 +123,10 @@ module.exports.addClub = async (formData) => {
 };
 
 // 동아리 삭제
-module.exports.removeClub = async (clubName) => {
+module.exports.removeClub = async (clubId) => {
 	// 동아리 존재 여부 확인
 	const club = await Club.findOne({
-		where: { name: clubName },
+		where: { id: clubId },
 	});
 
 	if (!club) {

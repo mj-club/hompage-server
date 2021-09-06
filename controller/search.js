@@ -3,7 +3,7 @@ const SearchService = require("../services");
 // 통합검색
 module.exports.searchAll = async (res, req, next) => {
   try {
-		const search = await SearchService.searchAll(keyword, searchOption, page);
+		const search = await SearchService.searchAll(req.body);
 		res.json(search);
 	} catch (err) {
 		next(err);
@@ -13,7 +13,7 @@ module.exports.searchAll = async (res, req, next) => {
 // 게시판 내 검색
 module.exports.searchByBoard = async (res, req, next) => {
   try {
-		const search = await SearchService.searchByBoard(keyword, searchOption, page);
+		const search = await SearchService.searchByBoard(req.body);
 		res.json(search);
 	} catch (err) {
 		next(err);

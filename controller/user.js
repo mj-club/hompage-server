@@ -13,7 +13,7 @@ module.exports.getProfile = async (res, req, next) => {
 // 프로필 수정
 module.exports.editProfile = async (res, req, next) => {
 	try {
-		const user = await UserService.editProfile(req.user.id, req);
+		const user = await UserService.editProfile(req.user.id, req.body);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -23,7 +23,7 @@ module.exports.editProfile = async (res, req, next) => {
 // 일정 추가
 module.exports.addSchedule = async (res, req, next) => {
 	try {
-		const user = await UserService.addSchedule(req, req.user.id);
+		const user = await UserService.addSchedule(req.body, req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -33,7 +33,7 @@ module.exports.addSchedule = async (res, req, next) => {
 // 일정 확인
 module.exports.getSchedule = async (res, req, next) => {
 	try {
-		const user = await UserService.getSchedule(date, scheduleId);
+		const user = await UserService.getSchedule(req.body.date, req.body.scheduleId);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -43,7 +43,7 @@ module.exports.getSchedule = async (res, req, next) => {
 // 일정 수정
 module.exports.editSchedule = async (res, req, next) => {
 	try {
-		const user = await UserService.editSchedule(scheduleId, req);
+		const user = await UserService.editSchedule(req.body.scheduleId, req.body);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -53,7 +53,7 @@ module.exports.editSchedule = async (res, req, next) => {
 // 일정 삭제
 module.exports.removeSchedule = async (res, req, next) => {
 	try {
-		const user = await UserService.removeSchedule(scheduleId);
+		const user = await UserService.removeSchedule(req.body.scheduleId);
 		res.json(user);
 	} catch (err) {
 		next(err);
@@ -63,7 +63,7 @@ module.exports.removeSchedule = async (res, req, next) => {
 // 일정 모두 불러오기
 module.exports.getAllSchedule = async (res, req, next) => {
 	try {
-		const user = await UserService.getAllSchedule(date, req.user.id);
+		const user = await UserService.getAllSchedule(req.body.date, req.user.id);
 		res.json(user);
 	} catch (err) {
 		next(err);

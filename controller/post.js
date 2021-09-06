@@ -14,7 +14,7 @@ module.exports.addPost = async (res, req, next) => {
 
 		// 공지사항 게시판
 		if (board === "announcement") {
-			if (belong === "unioin") {
+			if (belong === "union") {
 				post = await UnionService.addAnnouncementPost(req.user.id, req.body);
 				return post;
 			} else {
@@ -24,7 +24,7 @@ module.exports.addPost = async (res, req, next) => {
 		}
 		// 문의사항 게시판
 		else if (board === "question") {
-			if (belong === "unioin") {
+			if (belong === "union") {
 				post = await UserService.addUnionQuestionPost(req.user.id, req.body);
 				return post;
 			} else {

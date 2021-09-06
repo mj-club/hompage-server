@@ -38,6 +38,6 @@ router.post("/checkEmail", multer().none(), AuthController.checkEmail);
 router.post("/checkStudentId", multer().none(), AuthController.checkStudentId);
 
 /* 휴대폰번호 중복확인 */
-router.post("/ccheckPh", multer().none(), AuthController.checkPh);
+router.post("/checkPh", AuthController.checkPh);
 
 module.exports = router;
