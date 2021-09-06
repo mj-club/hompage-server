@@ -2,22 +2,12 @@ const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo } = re
 const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
-module.exports.getClubInfo = async (formData) => {
-	// 동아리 존재 여부 확인
-	const clubId = await Club.findOne({
-		attributes: ["id"],
-		where: { name: formData.clubName },
-	});
-
-	// 동아리 정보가 존재하지 않을 경우
-	if (!clubId) {
-		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
-		throw err;
-	}
+module.exports.getClubInfo = async (clubName) => {
 
 	// 동아리 정보 불러오기
-	const club = await ClubInfo.findOne({
-		where: { id: clubId },
+	let club = await Club.findOne({
+		where: { name: clubName },
+		include: [ClubInfo]
 	});
 
 	if (!club) {
@@ -29,20 +19,10 @@ module.exports.getClubInfo = async (formData) => {
 };
 
 // 동아리 정보 수정하기
-module.exports.editClubInfo = async (formData) => {
-	// 동아리 존재 여부 확인
-	const clubId = await Club.findOne({
-		attributes: ["id"],
-		where: { name: formData.clubName },
-	});
-
-	if (!clubId) {
-		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
-		throw err;
-	}
+module.exports.editClubInfo = async (clubId, formData) => {
 
 	// 동아리 정보 불러오기
-	const club = await ClubInfo.findOne({
+	let club = await ClubInfo.findOne({
 		where: { id: clubId },
 	});
 
@@ -69,7 +49,7 @@ module.exports.addMember = async (clubId, formData) => {
 
 	// 동아리원 추가
 	const userInfo = await StudentInfo.findOne({
-		where: { student_id: formData.studentId }
+		where: { student_id: formData.student_id }
 	})
 
 	if (!userInfo) {
@@ -78,7 +58,7 @@ module.exports.addMember = async (clubId, formData) => {
 	}
 
 	const user = await User.findOne({
-		where: { id: userInfo.id}
+		where: { id: userInfo.user_id}
 	});
 
 	if (!user) {
@@ -86,7 +66,7 @@ module.exports.addMember = async (clubId, formData) => {
 		throw err;
 	}
 
-	const club = await Club.findOne({
+	let club = await Club.findOne({
     where: { id: clubId }
   });
 
@@ -104,10 +84,14 @@ module.exports.addMember = async (clubId, formData) => {
 // 동아리원 삭제
 module.exports.removeMember = async (clubId, formData) => {
 
+	console.log(clubId);
+	console.log(formData.user_id);
 	// 동아리원 존재 여부 확인
-	const member = await Member.findOne({
-		where: { users_id: formData.userId, club_id: clubId },
+	let member = await Member.findOne({
+		where: { user_id: formData.user_id, club_id: clubId },
 	});
+
+	console.log(member);
 
 	if (!member) {
 		const err = NoSuchDataError("존재하지 않는 동아리원입니다.");
@@ -122,10 +106,12 @@ module.exports.removeMember = async (clubId, formData) => {
 
 // 모든 동아리원 불러오기
 module.exports.getAllMember = async (clubId) => {
+	console.log(clubId);
 	// 동아리 존재 여부 확인
 	const club = await Club.findOne({
 		where: { id: clubId },
 	});
+	console.log(club);
 
 	if (!club) {
 		const err = NoSuchDataError("존재하지 않는 동아리입니다.");
@@ -133,7 +119,8 @@ module.exports.getAllMember = async (clubId) => {
 	}
 
 	// 동아리원 불러오기
-	const members = club.getMembers();
+	const members = await club.getMembers();
+	console.log(members);
 
 	if (!members) {
 		const err = NoSuchDataError("존재하지 않는 동아리원입니다.");

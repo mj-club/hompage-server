@@ -1,7 +1,13 @@
 const { AuthService } = require("../services");
+const passport = require("passport");
+const express = require("express");
+const multer = require("multer");
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 // 회원가입
-module.exports.join = async (res, req, next) => {
+module.exports.join = async (req, res, next) => {
 	try {
 		const user = await AuthService.join(req.body);
 		res.json(user);
@@ -12,7 +18,9 @@ module.exports.join = async (res, req, next) => {
 
 // 로그인
 module.exports.login = (req, res, next) => {
+	console.log("하이!");
 	passport.authenticate("local", (authError, user, info) => {
+		console.log(user);
 		if (authError) {
 			console.error(authError);
 			return next(authError);
@@ -39,7 +47,7 @@ module.exports.logout = (req, res) => {
 };
 
 // 이메일 찾기
-module.exports.findEmail = async (res, req, next) => {
+module.exports.findEmail = async (req, res, next) => {
 	try {
 		const email = await AuthService.findEmail(req.body);
 		res.json(email);
@@ -49,7 +57,7 @@ module.exports.findEmail = async (res, req, next) => {
 };
 
 // 토큰 요청
-module.exports.sendTokenToMail = async (res, req, next) => {
+module.exports.sendTokenToMail = async (req, res, next) => {
 	try {
 		await AuthService.sendTokenToMail(req.body);
 		res.json(true);
@@ -59,7 +67,7 @@ module.exports.sendTokenToMail = async (res, req, next) => {
 };
 
 // 비번 재설정
-module.exports.resetPW = async (res, req, next) => {
+module.exports.resetPW = async (req, res, next) => {
 	try {
 		const result = await AuthService.resetPW(
 			req.params.token,
@@ -72,7 +80,7 @@ module.exports.resetPW = async (res, req, next) => {
 };
 
 // 회원 탈퇴
-module.exports.leave = async (res, req, next) => {
+module.exports.leave = async (req, res, next) => {
 	try {
 		const result = await AuthService.quit(req.user.id);
 		res.json(result);
@@ -82,10 +90,10 @@ module.exports.leave = async (res, req, next) => {
 };
 
 // 계정 권한 확인하기
-module.exports.checkPermission = (res, req, next) => {};
+module.exports.checkPermission = (req, res, next) => {};
 
 // 이메일 중복확인
-module.exports.checkEmail = async (res, req, next) => {
+module.exports.checkEmail = async (req, res, next) => {
 	try {
 		const result = await AuthService.checkDuplication("email", req.body.email);
 		res.json(result);
@@ -95,7 +103,7 @@ module.exports.checkEmail = async (res, req, next) => {
 };
 
 // 학번 중복확인
-module.exports.checkStudentId = async (res, req, next) => {
+module.exports.checkStudentId = async (req, res, next) => {
 	try {
 		const result = await AuthService.checkDuplication(
 			"student_id",
@@ -108,7 +116,7 @@ module.exports.checkStudentId = async (res, req, next) => {
 };
 
 // 휴대폰번호 중복확인
-module.exports.checkPh = async (res, req, next) => {
+module.exports.checkPh = async (req, res, next) => {
 	try {
 		const result = await AuthService.checkDuplication(
 			"ph_number",

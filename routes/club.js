@@ -14,7 +14,7 @@ router
 router
 	.route("/member")
 	.post(multer().none(), ClubController.addMember)
-	.delete(ClubController.removeMember);
+	.delete(multer().none(), ClubController.removeMember);
 
 /* 모든 멤버 확인 */
 router.get("/member/all", ClubController.getAllMember);
