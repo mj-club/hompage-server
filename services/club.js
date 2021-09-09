@@ -1,4 +1,13 @@
-const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo } = require("../models");
+const {
+	Club,
+	ClubInfo,
+	Member,
+	Manager,
+	Post,
+	Comment,
+	User,
+	StudentInfo,
+} = require("../models");
 const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
@@ -66,11 +75,10 @@ module.exports.editClubInfo = async (formData) => {
 
 // 동아리원 추가
 module.exports.addMember = async (clubId, formData) => {
-
 	// 동아리원 추가
 	const userInfo = await StudentInfo.findOne({
-		where: { student_id: formData.studentId }
-	})
+		where: { student_id: formData.studentId },
+	});
 
 	if (!userInfo) {
 		const err = NoSuchDataError("존재하지 않는 계정 정보입니다.");
@@ -78,7 +86,7 @@ module.exports.addMember = async (clubId, formData) => {
 	}
 
 	const user = await User.findOne({
-		where: { id: userInfo.id}
+		where: { id: userInfo.id },
 	});
 
 	if (!user) {
@@ -87,23 +95,22 @@ module.exports.addMember = async (clubId, formData) => {
 	}
 
 	const club = await Club.findOne({
-    where: { id: clubId }
-  });
+		where: { id: clubId },
+	});
 
-  await club.addUser(user, {
-    through: { position: formData.position },
-  });
-  club = await Club.findOne({
-    where: { id: clubId },
-    include: User,
-  });
+	await club.addUser(user, {
+		through: { position: formData.position },
+	});
+	club = await Club.findOne({
+		where: { id: clubId },
+		include: User,
+	});
 
 	return club;
 };
 
 // 동아리원 삭제
 module.exports.removeMember = async (clubId, formData) => {
-
 	// 동아리원 존재 여부 확인
 	const member = await Member.findOne({
 		where: { users_id: formData.userId, club_id: clubId },
@@ -149,12 +156,14 @@ module.exports.addAnnouncementPost = async (userId, formData) => {
 	let user, board, post;
 
 	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Manager.findOne({ where: { user_id: userId } }).then((manager) => {
-			Board.findOne({
-				where: { name: "announcement", club_id: manager.club_id },
-			}).then((obj) => (board = obj));
-		});
+		return Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Manager.findOne({ where: { user_id: userId } }).then((manager) => {
+				Board.findOne({
+					where: { name: "announcement", club_id: manager.club_id },
+				}).then((obj) => (board = obj));
+			}),
+		]);
 	};
 
 	const create = () => {

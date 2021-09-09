@@ -1,5 +1,5 @@
 const { AuthService } = require("../services");
-
+const passport = require("passport");
 // 회원가입
 module.exports.join = async (res, req, next) => {
 	try {
