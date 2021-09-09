@@ -1,4 +1,4 @@
-const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo } = require("../models");
+const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo, Board } = require("../models");
 const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
 
 // 동아리 정보 불러오기
@@ -136,51 +136,68 @@ module.exports.getAllMember = async (clubId) => {
 // 공지사항 게시물 등록하기
 module.exports.addAnnouncementPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
+	console.log("formData = ", formData);
 	let user, board, post;
 
 	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Manager.findOne({ where: { user_id: userId } }).then((manager) => {
+		return Promise.all(
+			[User.findByPk(userId).then((obj) => {user = obj; return obj}).then((obj) => {console.log("init - user = ", user); console.log("init - obj = ", obj)}),
+			Manager.findOne({ where: { user_id: userId } }).then((manager) => {
 			Board.findOne({
 				where: { name: "announcement", club_id: manager.club_id },
 			}).then((obj) => (board = obj));
-		});
+		})]
+		);
 	};
 
 	const create = () => {
-		Post.create({
-			title,
-			thumbnail,
-			content,
-			set_top: false,
-			visit_count: 0,
-			comment_count: 0,
-			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		return new Promise((resolve, reject) => {
+			Post.create({
+				title,
+				thumbnail,
+				content,
+				set_top: false,
+				visit_count: 0,
+				comment_count: 0,
+				// 좋아요 수 추후 추가
+			}).then((obj) => (post = obj));
+		});
+		
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
-		if (files) {
-			File.upload(post, files);
-		}
+		return new Promise((resolve, reject) => {
+			post.addUser(user);
+			post.addBoard(board);
+			if (files) {
+				File.upload(post, files);
+			}
+		});
+		
 	};
 
-	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
-			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
-			],
+	const recall = () => {
+		return new Promise( async (resolve, reject) => {
+			const id = post.id;
+			post = await Post.findByPk(id, {
+				include: [
+					{ model: User, attributes: ["name"], required: false },
+					{ model: Board, attributes: ["name"], required: false },
+					{ model: File, required: false },
+				],
+			});
 		});
+		
 	};
 
 	await init();
+	console.log("init - user = ", user);
+	console.log("init - board = ",board);
 	await create();
+	console.log("create - post= ",post);
 	await associate();
+	console.log("associate - post = ",post);
+	console.log("associate - board = ",board);
 	await recall();
 
 	return post;

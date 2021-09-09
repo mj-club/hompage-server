@@ -1,5 +1,6 @@
 const { Board, Post, Club, Union, UnionInfo, User } = require("../models");
 const { NoSuchDataError } = require("../utils/handleError");
+const { Op } = (Sequelize = require("sequelize"));
 
 // 게시판별 게시물 보여주기
 module.exports.showBoard = async (belongName, boardName) => {
