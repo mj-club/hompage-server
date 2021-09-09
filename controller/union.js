@@ -1,3 +1,4 @@
+const { UnionInfo } = require("../models");
 const UnionService = require("../services/union");
 const { isUnionManager } = require("../utils/permission")
 
@@ -14,10 +15,12 @@ module.exports.addUnionInfo = async (req, res, next) => {
 // 총동연 정보 확인
 module.exports.getUnionInfo = async (req, res, next) => {
   try {
-		const union = "";
+		let union = "";
+		
 		const unionId = await isUnionManager(req.user.id);
-		if (typeof unionId == "number") {
-			union = await UnionService.getUnionInfo(unionId);
+		console.log("unionId= ", unionId);
+		if (unionId) {
+			union = await UnionService.getUnionInfo(req.params.unionName);
 		}
 		else {
 			const err = NoSuchDataError("권한이 없습니다.");
@@ -32,10 +35,12 @@ module.exports.getUnionInfo = async (req, res, next) => {
 // 총동연 정보 수정
 module.exports.editUnionInfo = async (req, res, next) => {
   try {
-		const union = "";
+		let union = "";
+		
 		const unionId = await isUnionManager(req.user.id);
-		if (typeof unionId == "number") {
-			union = await UnionService.editUnionInfo(unionId);
+		console.log("unionId= ", unionId);
+		if (unionId) {
+			union = await UnionService.editUnionInfo(req.params.unionName, req.body);
 		}
 		else {
 			const err = NoSuchDataError("권한이 없습니다.");
@@ -51,9 +56,11 @@ module.exports.editUnionInfo = async (req, res, next) => {
 module.exports.removeUnionInfo = async (req, res, next) => {
   try {
 		let union = "";
+		
 		const unionId = await isUnionManager(req.user.id);
-		if (typeof unionId == "number") {
-			union = await UnionService.removeUnionInfo(unionId);
+		console.log("unionId= ", unionId);
+		if (unionId) {
+			union = await UnionService.removeUnionInfo(req.params.unionName);
 		}
 		else {
 			const err = NoSuchDataError("권한이 없습니다.");
@@ -80,8 +87,8 @@ module.exports.removeClub = async (req, res, next) => {
   try {
 		let union = "";
 		const unionId = await isUnionManager(req.user.id);
-		if (typeof unionId == "number") {
-			union = UnionService.removeClub(unionId);
+		if (unionId) {
+			union = UnionService.removeClub(req.params.clubName);
 		}
 		else {
 			const err = NoSuchDataError("권한이 없습니다.");

@@ -31,7 +31,7 @@ module.exports.getProfile = async (id) => {
 	}
 
 	const student = await StudentInfo.findOne({
-		where: { users_id: user.id },
+		where: { user_id: user.id },
 	});
 
 	if (!student) {
@@ -67,7 +67,7 @@ module.exports.editProfile = async (userId, formData) => {
 	}
 
 	const student = await StudentInfo.findOne({
-		where: { users_id: user.id },
+		where: { user_id: user.id },
 	});
 
 	if (!student) {

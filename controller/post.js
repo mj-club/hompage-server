@@ -10,6 +10,8 @@ const { Permission } = require("../utils");
 module.exports.addPost = async (req, res, next) => {
 	try {
 		const { belong, board } = req.params;
+		console.log("belong = ", belong);
+		console.log("board = ", board);
 		let post;
 
 		// 공지사항 게시판
