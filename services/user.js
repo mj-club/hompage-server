@@ -10,13 +10,14 @@ const {
 	Post,
 	Board,
 	Comment,
+	File,
 } = require("../models");
 const {
 	ExistUserError,
 	NoSuchDataError,
 	NoPermissionError,
 } = require("../utils/handleError");
-const { File } = require("../utils");
+const utils = require("../utils");
 // 프로필 정보 불러오기
 module.exports.getProfile = async (id) => {
 	const user = await User.findOne({
@@ -46,15 +47,8 @@ module.exports.getProfile = async (id) => {
 
 // 프로필 정보 수정하기
 module.exports.editProfile = async (userId, formData) => {
-	const {
-		email,
-		name,
-		ph_number,
-		department,
-		major,
-		school_year,
-		student_id,
-	} = formData;
+	const { email, name, ph_number, department, major, school_year, student_id } =
+		formData;
 	const user = await User.findOne({
 		where: { id: userId },
 	});
@@ -101,7 +95,7 @@ module.exports.addSchedule = async (formData, userId) => {
 		description,
 		start,
 		end,
-		all_day_long
+		all_day_long,
 	});
 
 	// 계정 타입확인
@@ -143,7 +137,7 @@ module.exports.addSchedule = async (formData, userId) => {
 
 // 일정 수정하기
 module.exports.editSchedule = async (scheduleId, formData) => {
-	const { title, description, start, end, all_day_long} = formData;
+	const { title, description, start, end, all_day_long } = formData;
 	const schedule = await Schedule.findOne({
 		where: { id: scheduleId },
 	});
@@ -160,7 +154,7 @@ module.exports.editSchedule = async (scheduleId, formData) => {
 		description,
 		start,
 		end,
-		all_day_long
+		all_day_long,
 	});
 
 	return schedule;
@@ -334,13 +328,15 @@ module.exports.addFreePost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "free" } }).then((obj) => (board = obj));
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "free" } }).then((obj) => (board = obj)),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -348,26 +344,31 @@ module.exports.addFreePost = async (userId, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -384,17 +385,19 @@ module.exports.addClubQuestionPost = async (userId, belongName, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Club.findOne({ where: { name: belongName } }).then((clubObj) => {
-			Board.findOne({ where: { name: "question", club_id: clubObj.id } }).then(
-				(boardObj) => (board = boardObj)
-			);
-		});
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Club.findOne({ where: { name: belongName } }).then((clubObj) => {
+				Board.findOne({
+					where: { name: "question", club_id: clubObj.id },
+				}).then((boardObj) => (board = boardObj));
+			}),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -402,26 +405,31 @@ module.exports.addClubQuestionPost = async (userId, belongName, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -437,15 +445,17 @@ module.exports.addUnionQuestionPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "question", union_id: 1 } }).then(
-			(obj) => (board = obj)
-		);
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "question", union_id: 1 } }).then(
+				(obj) => (board = obj)
+			),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -453,26 +463,31 @@ module.exports.addUnionQuestionPost = async (userId, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -488,13 +503,17 @@ module.exports.addPetitionPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "petition" } }).then((obj) => (board = obj));
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "petition" } }).then(
+				(obj) => (board = obj)
+			),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -502,26 +521,31 @@ module.exports.addPetitionPost = async (userId, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -543,29 +567,34 @@ module.exports.editPost = async (postId, formData) => {
 	};
 	//execute
 	const execute = async () => {
-		post.update({
+		console.log("start excute");
+		await post.update({
 			title,
 			thumbnail,
 			content,
 			set_top: set_top,
 		});
-		if (await post.hasFiles()) {
-			await File.delete(post);
+		console.log("end update");
+		if ((await post.countFiles()) !== 0) {
+			await utils.File.delete(post);
 			if (files) {
-				File.upload(post, files);
+				await utils.File.upload(post, files);
 			}
 		}
+		console.log("end excute");
 	};
 	//recall
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		console.log("start recall");
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
+		console.log("recall - post", post);
 	};
 
 	await init();
@@ -580,9 +609,11 @@ module.exports.removePost = async (userId, postId) => {
 	let post, user;
 
 	//init
-	const init = () => {
-		Post.findByPk(postId).then((obj) => (post = obj));
-		User.findByPk(userId).then((obj) => (user = obj));
+	const init = async () => {
+		await Promise.all([
+			Post.findByPk(postId).then((obj) => (post = obj)),
+			User.findByPk(userId).then((obj) => (user = obj)),
+		]);
 	};
 
 	//check
@@ -598,7 +629,8 @@ module.exports.removePost = async (userId, postId) => {
 	};
 	//execute
 	const execute = async () => {
-		await File.delete(post);
+		console.log("start execute");
+		await utils.File.delete(post);
 		await post.destroy();
 	};
 
@@ -615,17 +647,19 @@ module.exports.addComment = async (userId, postId, formData) => {
 	let { content } = formData;
 	let user, post, comment;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Post.findByPk(postId).then((obj) => (post = user));
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Post.findByPk(postId).then((obj) => (post = user)),
+		]);
 	};
 
-	const create = () => {
-		Comment.create({ content }).then((obj) => (comment = obj));
+	const create = async () => {
+		comment = await Comment.create({ content });
 	};
 
-	const associate = () => {
-		comment.addPost(post);
+	const associate = async () => {
+		await post.addComment(comment);
 	};
 
 	await init();
@@ -653,9 +687,11 @@ module.exports.removeComment = async (userId, commentId) => {
 	let comment, user;
 
 	//init
-	const init = () => {
-		Comment.findByPk(commentId).then((obj) => (comment = obj));
-		User.findByPk(userId).then((obj) => (user = obj));
+	const init = async () => {
+		await Promise.all([
+			Comment.findByPk(commentId).then((obj) => (comment = obj)),
+			User.findByPk(userId).then((obj) => (user = obj)),
+		]);
 	};
 
 	//check

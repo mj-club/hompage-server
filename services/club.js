@@ -1,13 +1,24 @@
-const { Club, ClubInfo, Member, Manager, Post, Comment, User, StudentInfo, Board } = require("../models");
+const {
+	Club,
+	ClubInfo,
+	Member,
+	Manager,
+	Post,
+	Comment,
+	User,
+	StudentInfo,
+	Board,
+	File,
+} = require("../models");
 const { NoPermissionError, NoSuchDataError } = require("../utils/handleError");
+const utils = require("../utils");
 
 // 동아리 정보 불러오기
 module.exports.getClubInfo = async (clubName) => {
-
 	// 동아리 정보 불러오기
 	let club = await Club.findOne({
 		where: { name: clubName },
-		include: [ClubInfo]
+		include: [ClubInfo],
 	});
 
 	if (!club) {
@@ -20,7 +31,6 @@ module.exports.getClubInfo = async (clubName) => {
 
 // 동아리 정보 수정하기
 module.exports.editClubInfo = async (clubId, formData) => {
-
 	// 동아리 정보 불러오기
 	let club = await ClubInfo.findOne({
 		where: { id: clubId },
@@ -46,11 +56,10 @@ module.exports.editClubInfo = async (clubId, formData) => {
 
 // 동아리원 추가
 module.exports.addMember = async (clubId, formData) => {
-
 	// 동아리원 추가
 	const userInfo = await StudentInfo.findOne({
-		where: { student_id: formData.student_id }
-	})
+		where: { student_id: formData.student_id },
+	});
 
 	if (!userInfo) {
 		const err = NoSuchDataError("존재하지 않는 계정 정보입니다.");
@@ -58,7 +67,7 @@ module.exports.addMember = async (clubId, formData) => {
 	}
 
 	const user = await User.findOne({
-		where: { id: userInfo.user_id}
+		where: { id: userInfo.user_id },
 	});
 
 	if (!user) {
@@ -67,23 +76,22 @@ module.exports.addMember = async (clubId, formData) => {
 	}
 
 	let club = await Club.findOne({
-    where: { id: clubId }
-  });
+		where: { id: clubId },
+	});
 
-  await club.addUser(user, {
-    through: { position: formData.position },
-  });
-  club = await Club.findOne({
-    where: { id: clubId },
-    include: User,
-  });
+	await club.addUser(user, {
+		through: { position: formData.position },
+	});
+	club = await Club.findOne({
+		where: { id: clubId },
+		include: User,
+	});
 
 	return club;
 };
 
 // 동아리원 삭제
 module.exports.removeMember = async (clubId, formData) => {
-
 	console.log(clubId);
 	console.log(formData.user_id);
 	// 동아리원 존재 여부 확인
@@ -121,7 +129,7 @@ module.exports.getAllMember = async (clubId) => {
 	// 동아리원 불러오기
 	// const members = await club.getMembers();
 	const members = await Member.findAll({
-		where: { club_id: clubId }
+		where: { club_id: clubId },
 	});
 	console.log(members);
 
@@ -136,68 +144,61 @@ module.exports.getAllMember = async (clubId) => {
 // 공지사항 게시물 등록하기
 module.exports.addAnnouncementPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
-	console.log("formData = ", formData);
 	let user, board, post;
 
-	const init = () => {
-		return Promise.all(
-			[User.findByPk(userId).then((obj) => {user = obj; return obj}).then((obj) => {console.log("init - user = ", user); console.log("init - obj = ", obj)}),
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
 			Manager.findOne({ where: { user_id: userId } }).then((manager) => {
-			Board.findOne({
-				where: { name: "announcement", club_id: manager.club_id },
-			}).then((obj) => (board = obj));
-		})]
-		);
+				Board.findOne({
+					where: { name: "announcement", club_id: manager.club_id },
+				}).then((obj) => {
+					console.log("board === ", obj);
+					board = obj;
+				});
+			}),
+		]);
 	};
 
-	const create = () => {
-		return new Promise((resolve, reject) => {
-			Post.create({
-				title,
-				thumbnail,
-				content,
-				set_top: false,
-				visit_count: 0,
-				comment_count: 0,
-				// 좋아요 수 추후 추가
-			}).then((obj) => (post = obj));
-		});
-		
+	const create = async () => {
+		await Post.create({
+			title,
+			thumbnail,
+			content,
+			set_top: false,
+			visit_count: 0,
+			comment_count: 0,
+			// 좋아요 수 추후 추가
+		}).then((obj) => (post = obj));
 	};
 
 	const associate = () => {
-		return new Promise((resolve, reject) => {
-			post.addUser(user);
-			post.addBoard(board);
-			if (files) {
-				File.upload(post, files);
-			}
-		});
-		
+		if (files) {
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
+		}
 	};
 
-	const recall = () => {
-		return new Promise( async (resolve, reject) => {
-			const id = post.id;
-			post = await Post.findByPk(id, {
-				include: [
-					{ model: User, attributes: ["name"], required: false },
-					{ model: Board, attributes: ["name"], required: false },
-					{ model: File, required: false },
-				],
-			});
+	const recall = async () => {
+		post = await Post.findByPk(post.id, {
+			include: [
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
+			],
 		});
-		
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
-	console.log("init - user = ", user);
-	console.log("init - board = ",board);
 	await create();
-	console.log("create - post= ",post);
 	await associate();
-	console.log("associate - post = ",post);
-	console.log("associate - board = ",board);
 	await recall();
 
 	return post;
@@ -209,15 +210,17 @@ module.exports.removePostInClub = async (userId, postId) => {
 	let post, clubIdByManager, clubIdByBoard;
 
 	//init
-	const init = () => {
-		Post.findByPk(postId)
-			.then((obj) => (post = obj))
-			.then(() => {
-				post.getBoard().then((board) => (clubIdByBoard = board.club_id));
-			});
-		Manager.findOne({ where: { user_id: userId } }).then(
-			(manager) => (clubIdByManager = manager.club_id)
-		);
+	const init = async () => {
+		await Promise.all([
+			Post.findByPk(postId)
+				.then((obj) => (post = obj))
+				.then(() => {
+					post.getBoard().then((board) => (clubIdByBoard = board.club_id));
+				}),
+			Manager.findOne({ where: { user_id: userId } }).then(
+				(manager) => (clubIdByManager = manager.club_id)
+			),
+		]);
 	};
 
 	//check
@@ -234,12 +237,12 @@ module.exports.removePostInClub = async (userId, postId) => {
 
 	//execute
 	const execute = async () => {
-		await File.delete(post);
+		await utils.File.delete(post);
 		await post.destroy();
 	};
 
 	await init();
-	await check();
+	check();
 	await execute();
 
 	//after
@@ -251,18 +254,20 @@ module.exports.removePostInClub = async (userId, postId) => {
 module.exports.removeCommentInClub = async (userId, commentId) => {
 	let comment, clubIdByManager, clubIdByBoard;
 
-	const init = () => {
-		Comment.findByPk(commentId)
-			.then((obj) => (comment = obj))
-			.then(() => {
-				comment
-					.getPost()
-					.getBoard()
-					.then((board) => (clubIdByBoard = board.club_id));
-			});
-		Manager.findOne({ where: { user_id: userId } }).then(
-			(manager) => (clubIdByManager = manager.club_id)
-		);
+	const init = async () => {
+		await Promise.all([
+			Comment.findByPk(commentId)
+				.then((obj) => (comment = obj))
+				.then(() => {
+					comment
+						.getPost()
+						.getBoard()
+						.then((board) => (clubIdByBoard = board.club_id));
+				}),
+			Manager.findOne({ where: { user_id: userId } }).then(
+				(manager) => (clubIdByManager = manager.club_id)
+			),
+		]);
 	};
 	const check = () => {
 		if (clubIdByBoard === clubIdByManager) {
@@ -277,5 +282,9 @@ module.exports.removeCommentInClub = async (userId, commentId) => {
 	const execute = async () => {
 		await comment.destroy();
 	};
+
+	await init();
+	check();
+	await execute();
 	return true;
 };

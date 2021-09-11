@@ -64,6 +64,13 @@ module.exports.upload = async (model, files) => {
 };
 
 // 파일 삭제
-module.exports.delete = (model) => {
-	model.getFiles().map((file) => file.destroy());
+module.exports.delete = async (model) => {
+	let files = await model.getFiles();
+	if (files) {
+		Promise.all(
+			files.map((file) => {
+				file.destroy();
+			})
+		);
+	}
 };
