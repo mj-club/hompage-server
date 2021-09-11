@@ -1,19 +1,18 @@
-const { Union, UnionInfo, Post, EventInfo, ClubInfo } = require("../models");
+const {
+	Club,
+	Union,
+	UnionInfo,
+	Post,
+	EventInfo,
+	ClubInfo,
+	File,
+} = require("../models");
+const utils = require("../utils");
 
 // 총동연 정보 추가하기
 module.exports.addUnionInfo = async (formData) => {
-	// n대 총동연 정보 존재여부 탐색
-	const unionInfo = await UnionInfo.findByPk(1);
-
-	if (unionInfo) {
-		const err = new Error();
-		err.message = "이미 등록된 총동연입니다.";
-		err.status = 412;
-		throw err;
-	}
-
 	// 추가
-	const addUnion = await UnionInfo.create({
+	const unionInfo = await UnionInfo.create({
 		name: formData.name,
 		slogan: formData.slogan,
 		introduction: formData.introduction,
@@ -23,18 +22,27 @@ module.exports.addUnionInfo = async (formData) => {
 		logo: formData.logo,
 		th: formData.th,
 	});
+	let union = await Union.findByPk(1);
+	if (!union) {
+		const err = new Error();
+		err.message = "db에 관련 정보가 없습니다.";
+		err.status = 404;
+		throw err;
+	}
 
-	return addUnion;
+	union = await union.addUnionInfo(unionInfo);
+
+	return union;
 };
 
 // 총동연 정보 불러오기
-module.exports.getUnionInfo = async (unionId) => {
+module.exports.getUnionInfo = async (unionName) => {
 	// 총동아리연합회 정보 불러오기
+	console.log(unionName);
 	const union = await Union.findByPk(1, {
-		include: {
-			include: [{ model: UnionInfo, where: { id: unionId } }],
-		},
+		include: [{ model: UnionInfo, where: { name: unionName } }],
 	});
+	console.log(union);
 
 	if (!union) {
 		const err = new Error();
@@ -47,10 +55,10 @@ module.exports.getUnionInfo = async (unionId) => {
 };
 
 // 총동연 정보 수정하기
-module.exports.editUnionInfo = async (unionId) => {
+module.exports.editUnionInfo = async (unionName, formData) => {
 	// n대 총동연 존재여부 탐색
 	const unionInfo = await UnionInfo.findOne({
-		where: { id: unionId },
+		where: { name: unionName },
 	});
 
 	if (!unionInfo) {
@@ -76,10 +84,10 @@ module.exports.editUnionInfo = async (unionId) => {
 };
 
 // 총동연 정보 삭제하기
-module.exports.removeUnionInfo = async (unionId) => {
+module.exports.removeUnionInfo = async (unionName) => {
 	// n대 총동연 존재여부 탐색
 	const unionInfo = await UnionInfo.findOne({
-		where: { id: unionId },
+		where: { name: unionName },
 	});
 
 	if (!unionInfo) {
@@ -97,10 +105,12 @@ module.exports.removeUnionInfo = async (unionId) => {
 
 // 동아리 추가
 module.exports.addClub = async (formData) => {
+	console.log("formData = ", formData);
 	// 동아리 존재 여부 확인
-	const club = await Club.findOne({
-		where: { name: formData.clubName },
+	let club = await Club.findOne({
+		where: { name: formData.name },
 	});
+	console.log("club = ", club);
 
 	if (club) {
 		const err = new Error();
@@ -119,20 +129,23 @@ module.exports.addClub = async (formData) => {
 		location: formData.location,
 		department: formData.department,
 	});
+	console.log("clubInfo= ", clubInfo);
 
-	const club = await Club.create({
-		name: formData.name
+	club = await Club.create({
+		name: formData.name,
 	});
 
-	await clubInfo.addClub(club)
-	return addClub;
+	console.log("club= ", club);
+	await club.setClubInfo(clubInfo);
+
+	return club;
 };
 
 // 동아리 삭제
-module.exports.removeClub = async (clubId) => {
+module.exports.removeClub = async (clubName) => {
 	// 동아리 존재 여부 확인
 	const club = await Club.findOne({
-		where: { id: clubId },
+		where: { name: clubName },
 	});
 
 	if (!club) {
@@ -143,7 +156,7 @@ module.exports.removeClub = async (clubId) => {
 	}
 
 	const clubInfo = await ClubInfo.findOne({
-		where: { id: clubId },
+		where: { id: club.id },
 	});
 
 	if (!club) {
@@ -154,9 +167,10 @@ module.exports.removeClub = async (clubId) => {
 	}
 
 	// 삭제
-	const delClub = await club.destroy();
 	await clubInfo.destroy();
-	return delClub;
+	const delClub = await club.destroy();
+
+	return true;
 };
 
 // 공지사항 게시물 등록하기
@@ -164,15 +178,17 @@ module.exports.addAnnouncementPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "announcement", union_id: 1 } }).then(
-			(obj) => (board = obj)
-		);
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "announcement", union_id: 1 } }).then(
+				(obj) => (board = obj)
+			),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -180,26 +196,31 @@ module.exports.addAnnouncementPost = async (userId, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
-	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
+	const associate = async () => {
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -226,51 +247,64 @@ module.exports.addEventPost = async (userId, formData) => {
 	} = formData;
 	let user, board, post, eventInfo;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "event" } }).then((obj) => (board = obj));
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "event" } }).then((obj) => (board = obj)),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
-			title,
-			thumbnail,
-			content,
-			set_top: false,
-			visit_count: 0,
-			comment_count: 0,
-			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
-
-		EventInfo.create({
-			event_name,
-			event_target,
-			event_term,
-			event_start,
-			event_end,
-			event_link,
-		}).then((obj) => (eventInfo = obj));
+	const create = async () => {
+		await Promise.all([
+			Post.create({
+				title,
+				thumbnail,
+				content,
+				set_top: false,
+				visit_count: 0,
+				comment_count: 0,
+				// 좋아요 수 추후 추가
+			}).then((obj) => (post = obj)),
+			EventInfo.create({
+				event_name,
+				event_target,
+				event_term,
+				event_start,
+				event_end,
+				event_link,
+			}).then((obj) => (eventInfo = obj)),
+		]);
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
-		post.addEventInfo(eventInfo);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				post.addEventInfo(eventInfo),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				post.addEventInfo(eventInfo),
+			]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: EventInfo, required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
+		eventInfo = await EventInfo.findOne({ where: { post_id: post.id } });
+		post.EventInfo = eventInfo;
 	};
 
 	await init();
@@ -286,15 +320,17 @@ module.exports.addMonthlyKeyumPost = async (userId, formData) => {
 	let { title, thumbnail, content, files } = formData;
 	let user, board, post;
 
-	const init = () => {
-		User.findByPk(userId).then((obj) => (user = obj));
-		Board.findOne({ where: { name: "monthly_keyum" } }).then(
-			(obj) => (board = obj)
-		);
+	const init = async () => {
+		await Promise.all([
+			User.findByPk(userId).then((obj) => (user = obj)),
+			Board.findOne({ where: { name: "monthly_keyum" } }).then(
+				(obj) => (board = obj)
+			),
+		]);
 	};
 
-	const create = () => {
-		Post.create({
+	const create = async () => {
+		post = await Post.create({
 			title,
 			thumbnail,
 			content,
@@ -302,26 +338,31 @@ module.exports.addMonthlyKeyumPost = async (userId, formData) => {
 			visit_count: 0,
 			comment_count: 0,
 			// 좋아요 수 추후 추가
-		}).then((obj) => (post = obj));
+		});
 	};
 
 	const associate = () => {
-		post.addUser(user);
-		post.addBoard(board);
 		if (files) {
-			File.upload(post, files);
+			return Promise.all([
+				user.addPost(post),
+				board.addPost(post),
+				utils.File.upload(post, files),
+			]);
+		} else {
+			console.log("No files");
+			return Promise.all([user.addPost(post), board.addPost(post)]);
 		}
 	};
 
 	const recall = async () => {
-		const id = post.id;
-		post = await Post.findByPk(id, {
+		post = await Post.findByPk(post.id, {
 			include: [
-				{ model: User, attributes: ["name"], required: false },
-				{ model: Board, attributes: ["name"], required: false },
-				{ model: File, required: false },
+				{ model: User, attributes: ["name"] },
+				{ model: Board, attributes: ["name"] },
 			],
 		});
+		files = await File.findAll({ where: { post_id: post.id } });
+		post.File = files;
 	};
 
 	await init();
@@ -341,7 +382,7 @@ module.exports.removeOtherPost = async (postId) => {
 	post = await Post.findByPk(postId);
 
 	//execute
-	await File.delete(post);
+	await utils.File.delete(post);
 	await post.destroy();
 
 	//after

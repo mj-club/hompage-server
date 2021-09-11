@@ -1,6 +1,8 @@
 var express = require("express");
 var router = express.Router();
 var UnionController = require("../controller/union");
+var { fileMulter } = require("../utils/file");
+var multer = require("multer");
 
 /* 총동연 정보 추가 */
 router.post("/", fileMulter.array("files"), UnionController.addUnionInfo);

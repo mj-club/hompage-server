@@ -1,5 +1,6 @@
 const { Board, Post, Club, Union, UnionInfo, User } = require("../models");
 const { NoSuchDataError } = require("../utils/handleError");
+const { Op } = (Sequelize = require("sequelize"));
 
 // 게시판별 게시물 보여주기
 module.exports.showBoard = async (belongName, boardName) => {
@@ -39,15 +40,23 @@ module.exports.showBoard = async (belongName, boardName) => {
 
 // 특정 게시물 보여주기
 module.exports.showPost = async (postId) => {
-	const post = Post.findByPk(postId, {
-		include: [Comment, File, { model: User, attributes: ["name"] }],
+	console.log("postId = ", postId);
+	let post = await Post.findByPk(postId, {
+		include: [{ model: User, attributes: ["name"] }],
+		// Comment, File,
 	});
+	await Promise.all([
+		post.getComments().then((arr) => (post.Comment = arr)),
+		post.getFiles().then((arr) => (post.File = arr)),
+	]);
+	console.log("post = ", post);
 	if (!post) {
 		const err = NoSuchDataError("해당 게시물을 찾을 수 없습니다.");
 		throw err;
 	}
 
 	let visit_count = parseInt(post.visit_count) + 1;
+	console.log(visit_count);
 	post = await post.update({ visit_count });
 	return post;
 };
@@ -154,9 +163,7 @@ module.exports.searchAll = async (formData) => {
 };
 
 // 특정 게시판에서 키워드로 검색하기
-module.exports.searchByBoard = async (
-	formData
-) => {
+module.exports.searchByBoard = async (formData) => {
 	let fetchCount = formData.page;
 	let keyword = formData.keyword;
 	let searchOption = formData.searchOption;

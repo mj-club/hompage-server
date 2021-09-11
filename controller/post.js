@@ -7,49 +7,51 @@ const {
 const { Permission } = require("../utils");
 
 // 게시물 등록
-module.exports.addPost = async (res, req, next) => {
+module.exports.addPost = async (req, res, next) => {
 	try {
 		const { belong, board } = req.params;
+		console.log("belong = ", belong);
+		console.log("board = ", board);
 		let post;
 
 		// 공지사항 게시판
 		if (board === "announcement") {
 			if (belong === "union") {
 				post = await UnionService.addAnnouncementPost(req.user.id, req.body);
-				return post;
+				res.json(post);
 			} else {
 				post = await ClubService.addAnnouncementPost(req.user.id, req.body);
-				return post;
+				res.json(post);
 			}
 		}
 		// 문의사항 게시판
 		else if (board === "question") {
 			if (belong === "union") {
 				post = await UserService.addUnionQuestionPost(req.user.id, req.body);
-				return post;
+				res.json(post);
 			} else {
 				post = await UserService.addClubQuestionPost(
 					req.user.id,
 					belong,
 					req.body
 				);
-				return post;
+				res.json(post);
 			}
 		}
 		// 이벤트 게시판
 		else if (board === "event") {
 			post = await UnionService.addEventPost(req.user.id, req.body);
-			return post;
+			res.json(post);
 		}
 		// 월별 활동 게시판
 		else if (board === "monthlyKeyum") {
 			post = await UnionService.addEventPost(req.user.id, req.body);
-			return post;
+			res.json(post);
 		}
 		// 청원 게시판
 		else if (board === "petition") {
 			post = await UnionService.addEventPost(req.user.id, req.body);
-			return post;
+			res.json(post);
 		}
 		//자유게시판
 		else if (board === "free") {
@@ -61,31 +63,31 @@ module.exports.addPost = async (res, req, next) => {
 };
 
 // 게시물 보여주기
-module.exports.showPost = async (res, req, next) => {
+module.exports.showPost = async (req, res, next) => {
 	try {
 		const post = await PageService.showPost(req.params.postId);
-		return post;
+		res.json(post);
 	} catch (err) {
 		next(err);
 	}
 };
 
 // 게시물 수정하기
-module.exports.editPost = async (res, req, next) => {
+module.exports.editPost = async (req, res, next) => {
 	try {
 		const post = await UserService.editPost(req.params.postId, req.body);
-		return post;
+		res.json(post);
 	} catch (err) {
 		next(err);
 	}
 };
 
 // 게시물 삭제하기
-module.exports.removePost = async (res, req, next) => {
+module.exports.removePost = async (req, res, next) => {
 	let post;
 	try {
 		post = await UserService.removePost(req.user.id, req.params.postId);
-		return post;
+		res.json(post);
 	} catch (err) {
 		if (err.name === "NoPermissionError") {
 			try {
@@ -97,7 +99,7 @@ module.exports.removePost = async (res, req, next) => {
 				} else {
 					post = await UnionService.removeOtherPost(req.params.postId);
 				}
-				return post;
+				res.json(post);
 			} catch (error) {
 				next(error);
 			}

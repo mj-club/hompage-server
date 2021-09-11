@@ -1,7 +1,7 @@
 const { UserService, ClubService, UnionService } = require("../services");
 
 // 댓글 등록
-module.exports.addComment = async (res, req, next) => {
+module.exports.addComment = async (req, res, next) => {
 	try {
 		const comment = await UserService.addComment(
 			req.user.id,
@@ -15,7 +15,7 @@ module.exports.addComment = async (res, req, next) => {
 };
 
 // 댓글 수정하기
-module.exports.editComment = async (res, req, next) => {
+module.exports.editComment = async (req, res, next) => {
 	try {
 		const comment = await UserService.editComment(
 			req.params.commentId,
@@ -28,7 +28,7 @@ module.exports.editComment = async (res, req, next) => {
 };
 
 // 댓글 삭제하기
-module.exports.removeComment = async (res, req, next) => {
+module.exports.removeComment = async (req, res, next) => {
 	let comment;
 	try {
 		comment = await UserService.removeComment(req.params.commentId);

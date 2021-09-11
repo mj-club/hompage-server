@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 var CommentController = require("../controller/comment");
+var multer = require("multer");
 
 /* 댓글 등록 */
 router.post("/:postId", multer().none(), CommentController.addComment);
