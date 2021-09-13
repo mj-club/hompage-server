@@ -67,7 +67,7 @@ module.exports.upload = async (model, files) => {
 module.exports.delete = async (model) => {
 	let files = await model.getFiles();
 	if (files) {
-		Promise.all(
+		await Promise.all(
 			files.map((file) => {
 				file.destroy();
 			})
